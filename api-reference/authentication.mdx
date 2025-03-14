@@ -1,0 +1,88 @@
+---
+title: 'Authentication'
+description: 'Learn how to authenticate your API requests'
+---
+
+# Authentication
+
+Our API uses Bearer token authentication for all endpoints. This applies to REST API endpoints, WebSocket connections, and SSE streams.
+
+## Getting an API Key
+
+1. Register for an account at [our developer portal](https://developer.example.com)
+2. Navigate to the API Keys section
+3. Generate a new API key
+4. Store your API key securely - it won't be shown again
+
+## Using Your API Key
+
+### REST API
+
+Include your API key in the `Authorization` header:
+
+```bash
+curl -X GET "https://api.example.com/v1/endpoint" \
+     -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### WebSocket
+
+Include your API key in the connection URL or headers:
+
+```javascript
+const socket = new WebSocket('wss://ws.example.com', {
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY'
+  }
+});
+```
+
+### Server-Sent Events
+
+Include your API key in the request headers:
+
+```javascript
+const eventSource = new EventSource('https://api.example.com/v1/events', {
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY'
+  }
+});
+```
+
+## Security Best Practices
+
+1. **Never share your API key** - Keep it confidential
+2. **Rotate keys regularly** - Generate new keys periodically
+3. **Use environment variables** - Don't hardcode keys in your application
+4. **Implement key scoping** - Use different keys for different environments
+
+## Rate Limiting
+
+Authentication also helps us enforce rate limiting:
+
+- Free tier: 60 requests per minute
+- Pro tier: 1000 requests per minute
+- Enterprise tier: Custom limits
+
+Rate limit headers are included in all responses:
+- `X-RateLimit-Limit`: Your tier's rate limit
+- `X-RateLimit-Remaining`: Remaining requests
+- `X-RateLimit-Reset`: Time until limit resets
+
+## Error Responses
+
+If authentication fails, you'll receive:
+
+```json
+{
+  "error": {
+    "code": "auth_error",
+    "message": "Invalid or expired API key",
+    "status": 401
+  }
+}
+```
+
+Common authentication errors:
+- `401 Unauthorized`: Invalid or missing API key
+- `403 Forbidden`: Valid key but insufficient permissions 
