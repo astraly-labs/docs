@@ -1,0 +1,31 @@
+---
+title: Overview
+sidebarTitle: Overview
+---
+
+## Base URL
+
+The base URL for the WebSocket API is `wss://{environment}.pragma.build`.
+
+where `{environment}` is either `devnet` or `prod`.
+
+## Authentication
+
+All websocket connections are public and opened for now.
+
+<Note>
+    In the near future they will be protected by an api key similar to the rest api.
+</Note>
+
+## Connection Details
+
+#### Byte Rate Limiting
+- Limited to 256 KB per second per IP address
+- Connections exceeding this limit are automatically closed
+- Rate limits are tracked and enforced per unique IP address
+
+
+#### Inactivity Management
+- Connections automatically close after 60 seconds of inactivity
+- Prevents resource consumption from idle connections
+- You should send a ping message every 30 seconds to keep the connection alive
