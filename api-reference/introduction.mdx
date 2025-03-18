@@ -5,31 +5,42 @@ description: 'Welcome to the Pragma Node API documentation'
 
 # Pragma Node API
 
-Welcome to the Pragma Node API documentation. This API provides access to both on-chain and off-chain price data, as well as optimistic oracle functionality and real-time data streaming through WebSocket connections.
+Pragma offers a highly accurate, readily available, and fast API built on our extensive network of data providers.
+This empowers developers to drive the evolution of next-generation applications. 
+Our API provides the most reliable prices and financial data at a very high frequency. Here's how it works:
+
+<img height='100%' width='100%'src="/img/flowchart/Pragmapi.webp"/>
 
 ## Base URL
 
+We have two environments available, we recommend you use the development endpoint until you are confident about going to production.
+
+**Development**
 ```
-https://{environment}.pragma.build/node/v1
+https://api.devnet.pragma.build/node/v1
 ```
 
-Where `{environment}` can be:
-- `devnet` - for testing purposes
-- `prod` - for production use
+**Production**
+```
+https://api.production.pragma.build/node/v1
+```
 
 ## Authentication
 
 Most endpoints require authentication using an API key. Include your API key in the request headers:
 
 ```bash
-Authorization: Bearer YOUR_API_KEY
+X-API-KEY: <YOUR_API_KEY>
 ```
+
+<Note>
+  We are currently still in private beta, DM us on [twitter]() or [telegram]() to get your own api key.
+</Note>
 
 ## API Groups
 
-Our API is organized into the following main categories:
+Our API is divided into the following categories:
 
 - **Offchain** - Access to aggregated price data and real-time market information
 - **Onchain** - Interact with on-chain price feeds and historical data
-- **Optimistic Oracle** - Access to Pragma's optimistic oracle functionality
 - **WebSocket** - Real-time data streaming capabilities

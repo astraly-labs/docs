@@ -1,0 +1,85 @@
+---
+title: Lightspeed
+sidebarTitle: Lightspeed
+---
+
+# What
+
+If all you need is the fastest and most accurate data in the market.
+Then, you're in the perfect place.
+
+This endpoint is very similar to our [StarkEx](./starkex.mdx) endpoint except it doesnt contain any metadata that would allow you to verify data's provenance.
+On the other hand it's slightly more efficient as it doesn't have the signature generation overhead.
+
+# How
+
+Open a websocket connection on the environment of your choice.
+
+e.g
+```bash
+wscat -c wss://ws.devnet.pragma.build/node/v1/price/subscribe
+```
+
+Sending a request to this endpoint establishes a channel to receive real-time data updates every 500 milliseconds.
+
+## Subscribing
+
+By default, no asset pairs are subscribed. To subscribe to specific pairs, send a message formatted as follows:
+
+```json
+{
+  "msg_type": "subscribe",
+  "pairs": ["BTC/USD", "ETH/USD:MARK"]
+}
+```
+
+The server will confirm your subscription with a response like this:
+
+```json
+{
+  "msg_type": "subscribe",
+  // the pairs you are currently subscribed to, here we were already
+  // subscribed to SOL/USD
+  "pairs": ["BTC/USD", "ETH/USD:MARK", "SOL/USD"]
+}
+```
+
+## Unsubscribing
+
+To unsubscribe from specific pairs, send a message formatted as follows:
+
+```json
+{
+  "msg_type": "unsubscribe",
+  "pairs": ["BTC/USD"]
+}
+```
+
+The server will confirm your unsubscription with a response like this:
+
+```json
+{
+  "msg_type": "unsubscribe",
+  // the pairs you are currently subscribed to
+  "pairs": ["ETH/USD:MARK"]
+}
+```
+
+## Response Format
+
+Subscribed data will be provided in the following JSON format for each asset pair:
+
+```json
+{
+  "pair_id": "0x12345",
+  "price": "10000000000000001",
+  "num_sources_aggregated": "8",
+}
+```
+
+**Field Descriptions**:
+
+- `pair_id`: Unique identifier for the asset encoded using the pair name.
+- `price`: The median price of the asset.
+- `num_sources_aggregated`: The number of sources that were aggregated for computing the median within the bucket.
+

@@ -1,0 +1,74 @@
+---
+title: Candlestick
+sidebarTitle: Candlestick
+---
+
+# What
+
+Looking for [OHLC]() data ? You're at the right place.
+
+<Note>
+    For now we only suport ohlc data for `onchain` data but it will soon be available for `offchain` data aswell.
+</Note>
+
+# How
+
+Open a websocket connection on the environment of your choice.
+
+e.g
+```bash
+wscat -c wss://ws.devnet.pragma.build/node/v1/onchain/ohlc/subscribe
+```
+
+Sending a request to this endpoint establishes a channel to receive real-time OHLC data updates at the given frequency.
+
+## Subscribing
+
+By default, no asset pair is subscribed. To subscribe to a specific pair, send a message formatted as follows:
+
+```json
+{
+  "msg_type": "subscribe",
+  "pair": "BTC/USD",
+  "network": "mainnet",
+  "interval": "1min",
+  "candles_to_get": "100" // Defaults to `10`
+}
+```
+
+The server will confirm your subscription with a response like this:
+
+```json
+{
+  "msg_type": "subscribe",
+  // We can only subscribe to one pair at a time
+  "pair": "BTC/USD",
+  "network": "mainnet",
+  "interval": "1min",
+}
+```
+
+When re-subscribing, it will override the current pair which you are subscribed to, if any.
+
+## Response Format
+
+Subscribed data will be provided in the following JSON format for each asset pair:
+
+```json
+TODO
+```
+
+## Unsubscribing
+
+To unsubscribe from specific pairs, send a message formatted as follows:
+
+```json
+{
+  "msg_type": "unsubscribe",
+  "pair": "BTC/USD",
+  "network": "mainnet",
+  "interval": "1min",
+}
+```
+
+The server will unsubscribe you for the pair without sending any acknowledgement.
