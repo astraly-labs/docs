@@ -1,0 +1,79 @@
+---
+title: TWAP
+description: "How to use on-chain TWAP"
+---
+
+## Time weighted average price (TWAP)
+
+For any price feed, Pragma offers a TWAP feed. The TWAP feed uses checkpoints in order to compute the time weighted average prices. The TWAP feed is useful for protocols that need to calculate the average price of an asset over a period of time. TWAP will be available for both Spot and Futures feeds, for now.
+
+### Sample Code
+
+If you are just trying to get started with our TWAP feed, see this self-contained code snippet here. You can find the full Oracle interface specification is available [here](https://github.com/astraly-labs/pragma-oracle/blob/main/pragma-oracle/src/compute_engines/summary_stats/summary_stats.cairo).
+
+```rust
+
+use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
+use pragma_lib::abi::{
+    ISummaryStatsABIDispatcher, ISummaryStatsABIDispatcherTrait
+};
+use pragma_lib::types::{AggregationMode, DataType};
+
+
+fn comupute_twap(data_type : DataType, aggregation_mode : AggregationMode) -> u128 {
+    let SUMMARY_STATS_ADDRESS: ContractAddress =
+        contract_address_const::<0x6421fdd068d0dc56b7f5edc956833ca0ba66b2d5f9a8fea40932f226668b5c4>();
+    let start_time = 1691315416; // or any wanted start time
+    let end_tick = get_block_timestamp();
+    let time = end_tick - start_time;
+    let summary_dispatcher = ISummaryStatsABIDispatcher { contract_address: SUMMARY_STATS_ADDRESS}
+    let (twap, decimals) = summary_dispatcher.calculate_twap(
+        data_type,
+        aggregation_mode,
+        time, // duration
+        start_time, // beginning of the twap
+    );
+    return twap; // will return the twap multiplied by 10^decimals
+}
+
+//USAGE
+
+let pair_id : felt252 = "ETH/USD";
+let expiration_timestamp = 0; // PERP
+
+//SPOT
+let twap = compute_twap(DataType::SpotEntry(pair_id), AggregationMode::Median(()));
+//FUTURES
+let twap = compute_twap(DataType::FutureEntry((pair_id, expiration_timestamp)), AggregationMode::Median(()));
+
+```
+
+## How TWAP is Calculated
+
+We calculate the Time wighted average price using the following formula:
+
+<img
+height="auto"
+width="auto"
+src="/img/flowchart/twap.webp"
+alt="twap"
+/>
+
+## Technical Specification
+
+### Function: `calculate_twap`
+
+This function allows you to query the TWAP for any price feed calculated over a requested period of time. The function accesses checkpoints within the requested timeframe, and uses the above equation to calculate the TWAP.
+Currently, Pragma sets a checkpoint every 5 minutes. If you need more granular data, you can set more checkpoint via the `set_checkpoint` function.
+
+#### Inputs
+
+- `data_type` : enum of the data type you are requesting (See DataType structure). By providing the enum data type, you also provide the pair id (for spot entries), or the pair id and the expiration timestamp (for futures)
+- `aggregation_mode`: aggregation mode to use for combining the many data sources available in Pragma. Use the structure AggregationMode defined in Pragma. Option must currently be set to `MEDIAN` or `MEAN`, . Additional options `VWAP`, `EXPONENTIAL_DECAY` are coming soon.
+- `time` : The duration (in seconds ) over which you want to calculate the TWAP. The TWAP will be calculated between `start_time` and `start_time`+ `time`.
+- `start_time` : The start time (in seconds) from which you want to calculate the TWAP. The TWAP will be calculated between `start_time` and `start_time`+ `time`.
+
+#### Returns
+
+- `twap` : The TWAP for the requested data type, aggregation mode, time and start time. The TWAP is multiplied by 10^decimals.
+- `decimals` : number of decimals, i.e. , the number of places that value has been shifted to allow for greater accuracy.

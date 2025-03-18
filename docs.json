@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Pragma Node API",
+  "name": "Pragma",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
@@ -11,35 +11,51 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "General",
         "groups": [
           {
             "group": "Get Started",
             "pages": [
-              "introduction",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Essentials",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/settings",
-              "essentials/navigation",
-              "essentials/reusable-snippets"
+              "introduction"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Starknet",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "starknet/introduction",
+              "starknet/architecture",
+              "starknet/quickstart"
+            ]
+          },
+          {
+            "group": "Integrate",
+            "pages": [
+              "starknet/assets",
+              "starknet/development",
+              "starknet/risks"
+            ]
+          },
+          {
+            "group": "Go Further",
+            "pages": [
+              "starknet/advanced/overview",
+              "starknet/advanced/twap",
+              "starknet/advanced/volatility"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "PragmAPI",
         "openapi": "https://raw.githubusercontent.com/astraly-labs/pragma-node/refs/heads/dev/openapi.json",
         "groups": [
           {
-            "group": "API Documentation",
+            "group": "Overview",
             "pages": [
               "api-reference/introduction"
             ]
@@ -89,8 +105,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/logo.svg",
+    "dark": "/logo/logo.svg"
   },
   "navbar": {
     "links": [
