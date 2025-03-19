@@ -50,7 +50,7 @@ let volatility = compute_volatility(DataType::SpotEntry(pair_id), AggregationMod
 
 We compute realized volatility under the Geometric Brownian Motion assumption using the following equation:
 
-<img width="auto" height="auto" src="/img/flowchart/realizedVol.webp" alt="realised-volatility" />
+<img width="auto" height="auto" src="/images/flowchart/realizedVol.webp" alt="realised-volatility" />
 
 Where σ is in units of 1/$\sqrt{T}$. We then multiply σ by $\sqrt{ΔTyear}$ to get the annualized volatility of the underlying asset.
 
