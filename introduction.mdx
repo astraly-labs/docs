@@ -1,6 +1,9 @@
 ---
 mode: "custom"
 ---
+export function openSearch() {
+  document.getElementById('search-bar-entry').click();
+}
 
 <div className="hero-section">
   <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
@@ -8,11 +11,37 @@ mode: "custom"
       <h1 className="text-6xl pt-10 tracking-tight pb-10 text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
         Build with Pragma
       </h1>
-      <h2 className="text-xl tracking-tight pb-10 text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
+      <h2 className="text-xl tracking-tight pb-4 text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
         Explore how to build with Pragma, and unlock the power of data.
       </h2>
-      <div className="mt-8">
-        <Search />
+      <div className="pb-8 max-w-2xl mx-auto">
+      <div className="flex max-w-2xl items-center justify-center mx-auto" style={{ maxWidth: '500px' }}>
+    <button
+      type="button"
+      className="hidden w-full lg:flex items-center text-sm leading-6 rounded-full py-2 pl-3 pr-3 shadow-sm text-gray-400 dark:text-white/50 bg-background-light dark:bg-background-dark dark:brightness-[1.1] dark:ring-1 dark:hover:brightness-[1.25] ring-1 ring-gray-400/20 hover:ring-gray-600/25 dark:ring-gray-600/30 dark:hover:ring-gray-500/30 focus:outline-primary"
+      id="home-search-entry"
+      style={{
+        marginTop: '2rem',
+        maxWidth: '100rem',
+        width: '90%',
+        margin: '2rem auto 0'
+      }}
+      onClick={openSearch}
+    >
+      <svg
+        className="h-4 w-4 ml-1.5 flex-none bg-primary-light hover:bg-gray-600 dark:bg-white/50 dark:hover:bg-white/70"
+        style={{
+          marginRight: '0.5rem',
+         maskImage:
+           'url("https://mintlify.b-cdn.net/v6.5.1/solid/magnifying-glass.svg")',
+         maskRepeat: 'no-repeat',
+         maskPosition: 'center center',
+        }}
+      />
+
+      Search docs, guides, and more... 
+    </button>
+    </div>
       </div>
     </div>
   </div>
