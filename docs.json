@@ -10,14 +10,17 @@
   "api": {
     "openapi": "https://raw.githubusercontent.com/astraly-labs/pragma-node/refs/heads/dev/openapi.json"
   },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/favicon_light.svg",
+    "dark": "/favicon.svg"
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "General",
+        "tab": "Welcome",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Welcome",
             "pages": [
               "introduction"
             ]
