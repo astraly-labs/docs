@@ -1,6 +1,6 @@
 ---
-title: Starkex
-sidebarTitle: Starkex
+title: "Starkex"
+sidebarTitle: "Starkex"
 ---
 
 # What
@@ -12,7 +12,6 @@ the right endpoint for you.
 
 Open a websocket connection on the environment of your choice.
 
-e.g
 ```bash
 wscat -c wss://ws.devnet.pragma.build/node/v1/data/subscribe
 ```
@@ -43,29 +42,38 @@ The server will confirm your subscription with a response like this:
 
 We currently support two types of subscriptions:
 
-#### Index price
+<Tabs>
+  <Tab title="Index Price">
+    #### Index price
 
-Median price for spot markets across supported exchanges.
+    Median price for spot markets across supported exchanges.
 
-**By default, subscriptions are for index prices**.
+    <Note>
+      By default, subscriptions are for index prices.
 
-It means subscribing to a pair without specifying the type will subscribe to the index price. For example, to subscribe to the index price of BTC/USD, use `BTC/USD`.
+      It means subscribing to a pair without specifying the type will subscribe to the index price. For example, to subscribe to the index price of BTC/USD, use `BTC/USD`.
+    </Note>
+  </Tab>
+  <Tab title="Mark Price">
+    #### Mark Price
 
-#### Mark Price
+    The mark price is the median perp price across supported exchanges.
 
-The mark price is the median perp price across supported exchanges.
+    **For assets quoted in a stablecoin, we compute as follow**:
 
-To subscribe to a specific mark price, append `:MARK` to the pair name. For example, to subscribe to the perpetual index price of ETH/USD, use `ETH/USD:MARK`.
+    1. Determine the median perp price of the asset quoted in the stablecoin.
+    2. Determine the median spot price of the stablecoin in USD.
+    3. Divide the median perp price by the median spot price of the stablecoin in USD.
 
-**For assets quoted in a stablecoin, we compute as follow**:
+    **For assets quoted in USD**:
 
-1. Determine the median perp price of the asset quoted in the stablecoin.
-2. Determine the median spot price of the stablecoin in USD.
-3. Divide the median perp price by the median spot price of the stablecoin in USD.
+    Determine the median perp price of the asset quoted in USD.
 
-**For assets quoted in USD**:
-
-Determine the median perp price of the asset quoted in USD.
+    <Note>
+      To subscribe to a specific mark price, append `:MARK` to the pair name. For example, to subscribe to the perpetual index price of ETH/USD, use `ETH/USD:MARK`.
+    </Note>
+  </Tab>
+</Tabs>
 
 ## Unsubscribing
 
@@ -132,7 +140,7 @@ Subscribed data will be provided in the following JSON format for each asset pai
 
 ### Rust
 
-We have already cooked a nice ratatui for you to test the endpoint, you can find it [here]().
+We have already cooked a nice ratatui for you to test the endpoint, you can find it [here](https://github.com/astraly-labs/pragma-node/blob/dev/pragma-node/examples/starkex.rs).
 
 Simply clone the `pragma-node` repository and run
 
@@ -142,9 +150,9 @@ cargo run --example starkex
 
 ### Python
 
-You can use the following Python code to connect to the Pragma websocket endpoint and subscribe to the TIA/USD index price:
+You can use the following Python code to connect to the Pragma websocket endpoint and subscribe to the `TIA/USD` index price:
 
-```python
+```python main.py [expandable]
 import asyncio
 import websockets
 import json
@@ -201,8 +209,6 @@ if __name__ == "__main__":
         print(f"An error occurred: {e}")
 ```
 
-Replace `PRAGMA_API_BASE_URL` with the base URL of the Pragma API.
-
-### Other
-
-You can also use `wscat` or any other websocket client to subscribe to the Pragma websocket endpoint.
+<Info>
+  Replace `PRAGMA_API_BASE_URL` with the base URL of the Pragma API.
+</Info>

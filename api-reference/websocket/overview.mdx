@@ -1,38 +1,44 @@
 ---
-title: Overview
-sidebarTitle: Overview
+title: "Overview"
+sidebarTitle: "Overview"
 ---
 
 ## Base URL
 
-Similar to the REST api, we have two environments available.
+<Tip>
+  We recommend you use the **Development** endpoint until you are confident about going to production.
+</Tip>
 
 **Development**
-```
+
+```bash
 wss://ws.devnet.pragma.build/node/v1
 ```
 
 **Production**
-```
+
+```bash
 wss://ws.production.pragma.build/node/v1
 ```
+
 ## Authentication
 
 All websocket connections are public and opened for now.
 
-<Note>
-    In the near future they will be protected by an api key similar to the REST api.
-</Note>
+<Warning>
+  In the near future they will be protected by an api key similar to the REST api.
+</Warning>
 
 ## Connection Details
 
 #### Byte Rate Limiting
+
 - Limited to **256 KB per second** per IP address
 - Connections exceeding this limit are automatically closed
 - Rate limits are tracked and enforced per unique IP address
 
-
 #### Inactivity Management
+
 - Connections automatically close after **60 seconds** of inactivity
 - Prevents resource consumption from idle connections
 - You should send a ping message every **30 seconds** to keep the connection alive
