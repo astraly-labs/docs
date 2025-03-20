@@ -12,19 +12,15 @@ Here is a simple contract allowing a user to retrieve the price of an asset, usi
 scarb add pragma_lib --git https://github.com/astraly-labs/pragma-lib
 ```
 
-**TODO** add scarbs.xyz
-
 ## Overview of the contract
 
-```rust
+```rust hack_template.cairo [expandable]
 use starknet::ContractAddress;
 
 #[starknet::interface]
 trait HackTemplateABI<TContractState> {
     fn get_asset_price(self: @TContractState, asset_id: felt252) -> u128;
 }
-
-
 
 #[starknet::contract]
 mod HackTemplate {
@@ -138,7 +134,7 @@ mod HackTemplate {
 }
 ```
 
-This is the general form of a starknet contract, you can learn more about the way to build a Starknet contract [here](https://book.cairo-lang.org/ch99-01-02-a-simple-contract.html).
+This is the general form of a starknet contract, you can learn more about the way to build a Starknet contract [here](https://book.cairo-lang.org/ch100-00-introduction-to-smart-contracts.html#anatomy-of-a-simple-contract).
 The notable point here is among the imports:
 
 ```rust
@@ -177,8 +173,8 @@ enum AggregationMode {
 }
 ```
 
-We deploying the contract, you will have to specify the oracle contract address and the summary stats contract address. The summary stats is a contract providing computational feeds (TWAP, Yield Curve, Realized Volatility, ...). In the provided example we will not use the summary stats contract.
-The oracle address can be found [here](./development.mdx).
+We deploying the contract, you will have to specify the oracle contract address and the summary stats contract address. The summary stats is a contract providing [computational feeds](./advanced/overview) (TWAP, Yield Curve, Realized Volatility, ...). In the provided example we will not use the summary stats contract.
+The oracle address can be found [here](./development).
 The previous contract is a simple contract, allowing a user to retrieve the price of an asset. You can play with a more complete example and deploy using Remix.
 
 <div >
@@ -188,27 +184,29 @@ The previous contract is a simple contract, allowing a user to retrieve the pric
 
 ## Working with Remix
 
-Since everything is already done, you will just have to compile the code and deploy the contract.
+<Steps>
+  <Step title="Activate the Starknet Plugin">
+    To begin with, you will have to activate the Starknet plugin:
+    <img src="/images/remix/remix1.webp" alt="starknet-plugin"/>
+  </Step>
+  
+  <Step title="Compile the Code">
+    Once the Starknet plugin is activated, the Starknet icon should appear on the left side of the screen. You will then need to compile the code:
+    <img src="/images/remix/remix2.webp" alt="compile"/>
+  </Step>
+  
+  <Step title="Deploy the Contract">
+    After compiling, create and deploy an account, and use the button to get testnet ETH:
+    <img src="/images/remix/remix3.webp" alt="deploy-account" />
+    
+    Finally, deploy the contract using the oracle contract address and the summary stats contract address. You can find the oracle address [here](./development) and the summary stats address [here](./advanced/overview).
+    <img src="/images/remix/remix4.webp" alt="deploy"/>
+  </Step>
+  
+  <Step title="Interact with the Contract">
+    Once deployed, you can interact with the contract:
+    <img src="/images/remix/remix5.webp" alt="interact"/>
+  </Step>
+</Steps>
 
-To begin with, you will have to activate the starknet plugin:
-
-  <img src="/images/remix/remix1.webp" alt="starknet-plugin"/>
-
-Once activate, the starknet icon should appear on the left side of the screen.
-Then, you will have to compile the code.
-
-  <img src="/images/remix/remix2.webp" alt="compile"/>
-
-Once compiled, you will have to create and deploy an account, and used the button to get testnet ETH.
-
-<img src="/images/remix/remix3.webp" alt="deploy-account" />
-
-You can finally deploy the contract. The addresses used for the constructor are the oracle contract address and the summary stats contract address. You can find the oracle address [here](./development.mdx). You can find the summary stats address [here](./advanced/overview.mdx).
-
-<img src="/images/remix/remix4.webp" alt="deploy"/>
-
-Once deployed, you can interact with the contract.
-
-<img src="/images/remix/remix5.webp" alt="interact"/>
-
-And that's it ! You have used Pragma !
+🎉 Congratulations! You have used Pragma!
