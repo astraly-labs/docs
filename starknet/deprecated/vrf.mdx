@@ -1,0 +1,290 @@
+---
+title: Pragma VRF
+description: "On-chain verifiable randomness"
+---
+
+<Warning>
+    This service is deprecated and is no longer available.
+    We recommend using [Cartridge VRF](https://docs.cartridge.gg/vrf/overview) instead.
+</Warning>
+
+Pragma offers a verifiable randomness feed that allows protocols to request secure randomness on-chain.
+This feed is being rolled out in two phases: In the first phase (currently live) the randomness proof is posted as calldata, allowing anyone to verify it off-chain. See below for more details on how to verify the randomness.
+
+<Note>
+
+In the second phase, the proof will be verified directly on-chain (coming soon) and requesters will be required to cover gas costs of their callback function plus a small fee to cover the cost of generating randomness.
+
+</Note>
+
+## Deployed Contracts
+
+You can find the latest deployed contracts at the following addresses :
+
+[Sepolia](https://sepolia.voyager.online/contract/0x60c69136b39319547a4df303b6b3a26fab8b2d78de90b6bd215ce82e9cb515c) : 0x60c69136b39319547a4df303b6b3a26fab8b2d78de90b6bd215ce82e9cb515c
+
+[Mainnet](https://voyager.online/contract/0x4fb09ce7113bbdf568f225bc757a29cb2b72959c21ca63a7d59bdb9026da661) : 0x4fb09ce7113bbdf568f225bc757a29cb2b72959c21ca63a7d59bdb9026da661
+
+## Sample Code
+
+If you are just trying to get started with using randomness, see the self-contained code snippet. If you'd like to use more advanced oracle functions, read on past the code block for further information. 
+You can find a full sample randomness receiver contract [here](https://github.com/astraly-labs/pragma-oracle/blob/main/src/randomness/example_randomness.cairo).
+
+```rust example.cairo [expandable]
+use starknet::ContractAddress;
+
+#[starknet::interface]
+trait IExampleRandomness<TContractState> {
+    fn get_last_random(self: @TContractState) -> felt252;
+    fn request_my_randomness(
+        ref self: TContractState,
+        seed: u64,
+        callback_address: ContractAddress,
+        callback_fee_limit: u128,
+        publish_delay: u64,
+        num_words: u64,
+        calldata: Array<felt252>
+    );
+    fn receive_random_words(
+        ref self: TContractState,
+        requestor_address: ContractAddress,
+        request_id: u64,
+        random_words: Span<felt252>,
+        calldata: Array<felt252>
+    );
+    fn withdraw_funds(ref self: TContractState, receiver: ContractAddress);
+}
+
+#[starknet::contract]
+mod ExampleRandomness {
+    use super::{ContractAddress, IExampleRandomness};
+    use starknet::info::{get_block_number, get_caller_address, get_contract_address};
+    use pragma::randomness::randomness::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
+    use pragma::admin::admin::Ownable;
+    use array::{ArrayTrait, SpanTrait};
+    use openzeppelin::token::erc20::interface::{
+        ERC20CamelABIDispatcher, ERC20CamelABIDispatcherTrait
+    };
+    use traits::{TryInto, Into};
+
+    #[storage]
+    struct Storage {
+        randomness_contract_address: ContractAddress,
+        min_block_number_storage: u64,
+        last_random_storage: felt252,
+    }
+
+    #[constructor]
+    fn constructor(ref self: ContractState, randomness_contract_address: ContractAddress) {
+        self.randomness_contract_address.write(randomness_contract_address);
+    }
+
+    #[external(v0)]
+    impl IExampleRandomnessImpl of IExampleRandomness<ContractState> {
+        fn get_last_random(self: @ContractState) -> felt252 {
+            let last_random = self.last_random_storage.read();
+            return last_random;
+        }
+
+
+        fn request_my_randomness(
+            ref self: ContractState,
+            seed: u64,
+            callback_address: ContractAddress,
+            callback_fee_limit: u128,
+            publish_delay: u64,
+            num_words: u64,
+            calldata: Array<felt252>
+        ) {
+            let randomness_contract_address = self.randomness_contract_address.read();
+            let randomness_dispatcher = IRandomnessDispatcher {
+                contract_address: randomness_contract_address
+            };
+            let caller = get_caller_address();
+            let compute_fees = randomness_dispatcher.compute_premium_fee(caller);
+
+            // Approve the randomness contract to transfer the callback fee
+            // You would need to send some ETH to this contract first to cover the fees
+            let eth_dispatcher = ERC20CamelABIDispatcher {
+                contract_address: 0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7 // ETH Contract Address
+                    .try_into()
+                    .unwrap()
+            };
+            eth_dispatcher
+                .approve(
+                    randomness_contract_address,
+                    (callback_fee_limit + compute_fees + callback_fee_limit / 5).into()
+                );
+
+            // Request the randomness
+            let request_id = randomness_dispatcher
+                .request_random(
+                    seed, callback_address, callback_fee_limit, publish_delay, num_words, calldata
+                );
+
+            let current_block_number = get_block_number();
+            self.min_block_number_storage.write(current_block_number + publish_delay);
+
+            return ();
+        }
+
+        fn withdraw_funds(ref self: ContractState, receiver: ContractAddress) {
+            assert_only_admin();
+            let eth_dispatcher = ERC20CamelABIDispatcher {
+                contract_address: 0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7 // ETH Contract Address
+                    .try_into()
+                    .unwrap()
+            };
+            let balance = eth_dispatcher.balanceOf(get_contract_address());
+            eth_dispatcher.transfer(receiver, balance);
+        }
+
+
+        fn receive_random_words(
+            ref self: ContractState,
+            requestor_address: ContractAddress,
+            request_id: u64,
+            random_words: Span<felt252>,
+            calldata: Array<felt252>
+        ) {
+            // Have to make sure that the caller is the Pragma Randomness Oracle contract
+            let caller_address = get_caller_address();
+            assert(
+                caller_address == self.randomness_contract_address.read(),
+                'caller not randomness contract'
+            );
+            // and that the current block is within publish_delay of the request block
+            let current_block_number = get_block_number();
+            let min_block_number = self.min_block_number_storage.read();
+            assert(min_block_number <= current_block_number, 'block number issue');
+
+            // and that the requestor_address is what we expect it to be (can be self
+            // or another contract address), checking for self in this case
+            //let contract_address = get_contract_address();
+            //assert(requestor_address == contract_address, 'requestor is not self');
+
+            // Optionally: Can also make sure that request_id is what you expect it to be,
+            // and that random_words_len==num_words
+
+            // Your code using randomness!
+            let random_word = *random_words.at(0);
+
+            self.last_random_storage.write(random_word);
+
+            return ();
+        }
+    }
+
+    fn assert_only_admin() {
+        let state: Ownable::ContractState = Ownable::unsafe_new_contract_state();
+        let admin = Ownable::OwnableImpl::owner(@state);
+        let caller = get_caller_address();
+        assert(caller == admin, 'Unauthorized');
+    }
+}
+```
+
+## How Randomness is Generated
+
+Pragma's randomness is based off of the [Internet Engineering Task Force's (IETF) Verifiable Random Function using elliptic curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vrf-06). Their Python implementation is available as [open source code](https://github.com/nccgroup/draft-irtf-cfrg-vrf-06/blob/master/README.md).
+
+When smart contracts request randomness, they specify a random seed. This seed uniquely determines the randomness, so the Pragma as the VRF provider is not able to manipulate the randomness. However calculating the randomness requires having access to a private key that is not known, so the smart contract (and any other party observing the randomness request) is not able to predict the randomness. Off-chain, the randomness is calculated using the private key and the seed. That randomness and the proof are then sent on-chain, where the unbiased randomness is then available to the smart contract that requested it.
+
+Pragma Oracle's verifiable random function (VRF) over a specific elliptic curve, named Curve25519. Most known blockchain implementations of a VRF are using the so-called "Bitcoin curve", or secpk256k1. We chose this algorithm because it is more secure than other commonly used ones (that possibly have backdoors - see [here](https://blog.cloudflare.com/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/#thedownside) and [here](https://blog.cryptographyengineering.com/2013/09/18/the-many-flaws-of-dualecdrbg/)). We chose this curve in particular for two reasons:
+
+- Building the tools to perform arithmetic operations on Curve25519 is a premiere for programmable blockchains and theoretically enables compatibility with [all the protocols](https://en.wikipedia.org/wiki/Curve25519#Protocols) that use Curve25519 for digital signatures, such as IPFS, Ripple, Monero, Signal, Protonmail, and many others. This is a great step towards interoperability with Starknet and it is only possible by leveraging its computational capabilities.
+
+- One key part of the VRF algorithm implies taking a public input and converting it to an elliptic curve point. This process is called "hashing to the curve", and the standard way of doing it for Curve25519 is using [Elligator2](https://eprint.iacr.org/2013/325). In Cairo, part of the Elligator algorithm can be computed quickly and safely using a hint and allows cheaper verification costs than hashing to the secpk256k1 curve.
+
+## Verifying The Randomness
+
+As mentioned above, in the first phase of Pragma Oracle's VRF feed, the randomness proof is posted as calldata, allowing anyone to verify it off-chain.
+
+In order to make it easier to verify that a specific piece of randomness was verifiable, we provide an open source implementation of the verifier. Follow these simple steps to verify any randomness provided by Pragma Oracle:
+
+1. Install the Pragma Python package `pip install pragma-sdk`
+2. Run `python3 -m pragma-sdk.cli random verify-random <TRANSACTION_HASH>` where `TRANSACTION_HASH` is the hash of the Starknet testnet transaction in which the randomness was submitted to your smart contract.
+
+## Pricing
+
+To use Pragma VRF, you must have a sufficient amount of the payment token in your consuming contract.
+
+| Fee Token | Testnet | Mainnet |
+| --------- | ------- | ------- |
+| ETH       | ✅      | ✅      |
+| STRK      | ❌      | ❌      |
+
+Pricing is divied in two parts :
+
+1. **Callback gas usage** : when requesting randomness you input a `callback_fee_limit` parameter that will be paid in the transaction's fee token. When randomness is submitted to the consumer contract, the fee excess is refunded.
+2. **Premium** : decreasing premium fee that goes to whoever is fulfilling the randomness request. You can find the exact pricing table below. The premium is paid in the fee token for now and will be replaced by a custom payment token along the road.
+
+| Total Number of Requests | Price (USD) |
+| ------------------------ | ----------- |
+| < 10                     | 1$          |
+| < 30                     | 0.5$        |
+| < 100                    | 0.25$       |
+| > 100                    | 0.1$        |
+
+## Retry Policy
+
+We will retry every second to fulfill your requests until **10** blocks have passed the specified minimum block number.
+
+## Technical Specification
+
+### Function: `request_random`
+
+Allows your smart contract to request randomness. Upon calling the Pragma contract, an event is emitted triggering the randomness and proof to be generated off-chain and then submitted back on-chain, calling the callback function `receive_random_words` on your contract.
+
+#### Inputs
+
+- `seed`: random seed that feeds into the verifiable random algorithm, must be different every time.
+- `callback_address`: address to call `receive_random_words` on with the randomness
+- `callback_fee_limit`: overall fee limit on the callback function
+- `publish_delay`: minimum number of blocks to wait from the request to fulfillment
+- `num_words`: number of random words to receive in one call. Each word is a felt252.
+- `calldata`: calldata we want to pass down to the callback function
+
+#### Returns
+
+- `request_id`: ID of the request, which can be used to check the status, cancel the request and check that the callback function was correctly called.
+
+### Callback Function: `receive_random_words`
+
+This is function must be defined on the contract at `callback_address` initially passed in the randomness request.
+
+#### Inputs
+
+- `requestor_address`: address that submitted the randomness request
+- `request_id`: id of the randomness request (auto-incrementing for each `requestor_address`)
+- `random_words`: an span of random words
+- `calldata`: calldata passed in the random request
+
+### Function: `cancel_random_request`
+
+Allows the requestor of randomness to cancel the request.
+
+#### Inputs
+
+- `request_id`: ID of the request to be canceled
+- `seed`: seed used to request the randomness
+- `requestor_address`: address of the contract that originally requested the randomness. Currently must be the same as the contract calling the cancel function
+- `minimum_block_number`: the block number in which the randomness could first have been published, equal to `publish_delay` + `block_number` of the request
+- `callback_address`: argument provided in the randomness request
+- `callback_fee_limit`: argument provided in the randomness request
+- `num_words`: argument provided in the randomness request
+
+### Function: `get_request_status`
+
+Get the status of a randomness request.
+
+#### Inputs
+
+- `requestor_address`: address of the requesting contract
+- `request_id`: ID of the request to be canceled
+
+#### Returns
+
+- `status_`: status of the request, see [here](https://github.com/astraly-labs/pragma-oracle/blob/main/src/randomness/randomness.cairo).
+  There are four defined status:
+  0=UNINITIALIZED, 1=RECEIVED, 2=FULFILLED, 3=CANCELLED, 4=OUT_OF_GAS

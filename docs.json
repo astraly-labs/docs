@@ -53,6 +53,14 @@
               "starknet/advanced/twap",
               "starknet/advanced/volatility"
             ]
+          },
+          {
+            "group": "Deprecated",
+            "pages": [
+              "starknet/deprecated/vrf",
+              "starknet/deprecated/optimistic-oracle",
+              "starknet/deprecated/merkle-feeds"
+            ]
           }
         ]
       },

@@ -1,0 +1,152 @@
+---
+title: Merkle Feeds
+description: "Merkle feeds are the most efficient way to get complex financial instruments updated on-demand on Starknet."
+---
+
+# Merkle Feeds
+
+<Note>
+Merkle feeds provide a secure and efficient "pull oracle" model for accessing option prices and other financial data on Starknet.
+</Note>
+
+The Pragma Consumer SDK is a powerful tool that allows developers to interact with Pragma's Merkle Feed system.
+This SDK enables you to fetch option prices and their associated Merkle proofs, which you can then use with the Pragma Oracle contract to access on-chain data.
+
+## What is a Merkle Feed?
+
+<Tip>
+A Merkle Feed is an efficient way to publish and verify large amounts of data on-chain while minimizing gas costs.
+</Tip>
+
+In Pragma's case, we publish a Merkle root on-chain that represents a tree of option prices for a specific blockchain height. Users can then use our SDK to retrieve prices off-chain and verify their correctness on-chain, creating a secure and efficient "pull oracle" model.
+
+## How It Works
+
+<Frame>
+  <img width="100%" height="100%" src="/images/flowchart/Flowchart-1.webp" alt="Merkle Feed Flow Diagram" />
+</Frame>
+
+<Steps>
+  <Step title="Data Sourcing">
+    The merkle trees are built with data from [Deribit](https://www.deribit.com/), the leading platform for options trading.
+  </Step>
+  <Step title="On-chain Publishing">
+    Merkle root is published on-chain _every_ block, ensuring data freshness.
+  </Step>
+  <Step title="Off-chain Retrieval">
+    Merkle proofs with associated data can be retrieved through REST and WebSocket endpoints or through a Rust crate we provide.
+  </Step>
+  <Step title="On-demand Updates">
+    Data is updated on-demand on-chain upon successful verification of the merkle proof.
+  </Step>
+</Steps>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Easy Integration" icon="gear">
+    Easy-to-use Rust SDK for seamless integration
+  </Card>
+  <Card title="Network Support" icon="network-wired">
+    Supports both mainnet and testnet environments
+  </Card>
+  <Card title="Flexible Retrieval" icon="clock">
+    Flexible block selection for data retrieval
+  </Card>
+  <Card title="Real-time Data" icon="bolt">
+    Access to real-time option pricing data
+  </Card>
+</CardGroup>
+
+## Usage
+
+To start using the Pragma Consumer SDK in your Rust project:
+
+### 1. Add the SDK to your Cargo.toml
+
+<CodeGroup>
+```toml Cargo.toml
+[dependencies]
+pragma-consumer = "0.1.0"
+```
+</CodeGroup>
+
+### 2. Initialize the Consumer in your code
+
+<CodeGroup>
+```rust Initialize
+let api_config = ApiConfig {
+    base_url: PragmaBaseUrl::Prod,
+    api_key: "your_api_key".into(),
+};
+
+let consumer = PragmaConsumerBuilder::new()
+    .on_mainnet()
+    .with_http(api_config)
+    .await?;
+```
+</CodeGroup>
+
+### 3. Fetch Merkle Feed data
+
+<CodeGroup>
+```rust Fetch Data
+let instrument = instrument!("BTC-16AUG24-52000-P");
+let merkle_feed_calldata = consumer
+    .get_merkle_feed_calldata(&instrument, None)
+    .await?;
+```
+</CodeGroup>
+
+### 4. Use the result to update the data on-chain
+
+<Accordion title="Complete On-chain Update Example">
+If you are just trying to get started with our Options Data Feed, see this self-contained code snippet here. The full Oracle interface specification is available [here](https://github.com/Astraly-Labs/pragma-oracle/blob/main/src/compute_engines/summary_stats/summary_stats.cairo).
+
+```rust main.rs
+let provider = JsonRpcClient::new(HttpTransport::new(
+    Url::parse("https://starknet-sepolia.public.blastapi.io/rpc/v0_7").unwrap(),
+));
+
+let signer = LocalWallet::from(SigningKey::from_secret_scalar(
+    Felt::from_hex("YOUR_PRIVATE_KEY_IN_HEX_HERE").unwrap(),
+));
+let address = Felt::from_hex("YOUR_ACCOUNT_CONTRACT_ADDRESS_IN_HEX_HERE").unwrap();
+let summary_stats_address =
+        Felt::from_hex("0x0379afb83d2f8e38ab08252750233665a812a24278aacdde52475618edbf879c").unwrap();
+
+let mut account = SingleOwnerAccount::new(
+        provider,
+        signer,
+        address,
+        chain_id::SEPOLIA,
+        ExecutionEncoding::New,
+    );
+
+let result = account
+        .execute_v1(vec![Call {
+            to: summary_stats_address,
+            selector: get_selector_from_name("update_options_data").unwrap(),
+            calldata: merkle_feed_calldata.as_calldata(),
+        }])
+        .send()
+        .await
+        .unwrap();
+
+println!("Transaction hash: {:#064x}", result.transaction_hash);
+```
+</Accordion>
+
+## Next steps
+
+<CardGroup>
+  <Card title="Examples" icon="code" href="https://github.com/astraly-labs/pragma-node/tree/main/pragma-consumer/examples">
+    Check out our examples to see the SDK in action and learn more about integrating Pragma's Merkle Feeds into your project.
+  </Card>
+  <Card title="GitHub Documentation" icon="github" href="https://github.com/astraly-labs/pragma-node/tree/main/pragma-consumer">
+    For more detailed technical information, please refer to our full documentation on GitHub.
+  </Card>
+  <Card title="API Reference" icon="book" href="https://docs.rs/pragma-consumer/0.1.0/pragma_consumer/#">
+    View comprehensive API reference on docs.rs.
+  </Card>
+</CardGroup>

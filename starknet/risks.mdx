@@ -3,29 +3,144 @@ title: Risks
 description: "What are the risks involved when using Pragma"
 ---
 
-Pragma offers pricing for a wide range of assets, both onchain and offchain, for developers to utilize in their applications. When integrating, developers should be aware of the varying risk levels associated with different feeds. Additionally, by integrating Pragma, you agree to our [terms and conditions](https://www.pragma.build/terms).
+# Understanding Pragma Risks
+
+<Note type="warning">
+By integrating Pragma, you agree to our [terms and conditions](https://www.pragma.build/terms).
+</Note>
+
+Pragma offers pricing for a wide range of assets, both onchain and offchain, for developers to utilize in their applications. When integrating with our oracle solution, developers should be aware of the varying risk levels associated with different feeds.
 
 ## Market Risks
 
-Our data publishers carefully select and use the best liquidity sources for each supported asset. However, inherent risks beyond the control of data publishers can affect pricing due to market manipulation. This is particularly true for long-tail assets where liquidity is provided by only a few actors, making market manipulation easier if they cease operations. Market manipulation can also occur with more established assets.
+<Tabs>
+  <Tab title="Risk Overview">
+    Our data publishers carefully select and use the best liquidity sources for each supported asset. However, inherent risks beyond the control of data publishers can affect pricing due to market manipulation. This is particularly true for long-tail assets where liquidity is provided by only a few actors.
+    
+    Developers integrating with Pragma should thoroughly understand these risks and conduct back-testing of every integration using Pragma's available historical data.
+  </Tab>
+  <Tab title="Risk Factors">
+    <CardGroup cols={2}>
+      <Card title="Liquidity Concentration" icon="droplet">
+        Assets with liquidity concentrated in few sources are more susceptible to manipulation
+      </Card>
+      <Card title="Publisher Diversity" icon="users">
+        Fewer data publishers can lead to higher vulnerability in the feed
+      </Card>
+      <Card title="Market Volatility" icon="chart-line">
+        Highly volatile assets may experience sudden price fluctuations
+      </Card>
+      <Card title="Source Reliability" icon="shield-check">
+        The quality and consistency of underlying data sources impact risk levels
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
 
-Developers integrating with Pragma should thoroughly understand these risks and conduct back-testing of every integration using Pragma's available historical data. To assist in this process, we've developed a risk assessment system for each asset supported by the oracle. While this system is for informational purposes only, it should be used in conjunction with thorough testing before implementation.
+## Risk Assessment System
 
-Our market risk system categorizes assets into the following risk levels:
+To assist in evaluating risks, we've developed a comprehensive risk assessment system for each asset supported by the oracle. While this system is for informational purposes only, it should be used in conjunction with thorough testing before implementation.
 
-- (L) Low risk: Assets with a high number of publishers and a high number of different sources. The volume is high, and the probabilities of market manipulation are low as a result.
-- (M) Moderate risk: These assets may possess characteristics that complicate accurate valuation or expose them to potential fluctuations, which could be problematic in certain scenarios. Although the feed structure is robust and decentralized, these assets carry heightened market-related risks. The concentration of liquidity in a single source or shifting market dynamics may contribute to this moderate level of risk.
-- (H) High risk: This asset typically displays an increased intensity of risk factors described in the "Moderate risk" category, or presents unique challenges that render its market price less predictable or stable. By utilizing an High risk data feed, you confirm your awareness of the associated risks and accept full responsibility for monitoring and managing these risks independently.
-- (D) Depreciating: You shouldn't use this feed that we're depreciating.
+<AccordionGroup>
+  <Accordion icon="circle-check" title="Low Risk (L)">
+    <Frame>
+      <div className="p-4 bg-green-50 rounded-lg">
+        Assets with a high number of publishers and diverse sources. The trading volume is high, and the probabilities of market manipulation are low as a result.
+      </div>
+    </Frame>
+    
+    **Characteristics:**
+    - Multiple independent data publishers
+    - Diverse liquidity sources
+    - High trading volume
+    - Established market presence
+  </Accordion>
 
-Check the risks of the assets we're supporting on the integration page.
+  <Accordion icon="exclamation" title="Moderate Risk (M)">
+    <Frame>
+      <div className="p-4 bg-yellow-50 rounded-lg">
+        These assets may possess characteristics that complicate accurate valuation or expose them to potential fluctuations, which could be problematic in certain scenarios.
+      </div>
+    </Frame>
+    
+    **Factors to consider:**
+    - Although the feed structure is robust and decentralized, these assets carry heightened market-related risks
+    - Concentration of liquidity in a limited number of sources
+    - Shifting market dynamics may contribute to this moderate level of risk
+  </Accordion>
 
-## Integration risks
+  <Accordion icon="triangle-exclamation" title="High Risk (H)">
+    <Frame>
+      <div className="p-4 bg-red-50 rounded-lg">
+        This asset typically displays an increased intensity of risk factors described in the "Moderate risk" category, or presents unique challenges that render its market price less predictable or stable.
+      </div>
+    </Frame>
+    
+    <Warning>
+      By utilizing a High risk data feed, you confirm your awareness of the associated risks and accept full responsibility for monitoring and managing these risks independently.
+    </Warning>
+  </Accordion>
 
-We're passionate about Pragma and eager to assist you with integrating our oracle. However, it's crucial to have a thorough process for evaluating the security of the integration. All code must be rigorously tested and audited, particularly:
+  <Accordion icon="ban" title="Depreciating (D)">
+    <Frame>
+      <Warning>
+        You shouldn't use feeds that we're depreciating.
+      </Warning>
+    </Frame>
+    
+    Depreciating feeds will be discontinued in the future. We recommend migrating to alternative feeds as soon as possible.
+  </Accordion>
+</AccordionGroup>
 
-- The imports used to integrate the oracle
-- The code that interacts with the oracle
-- The logic that leverages the oracle's data
+<Tip>
+Check the risks of the assets we're supporting on the integration page for each specific feed.
+</Tip>
 
-We'd be happy to introduce you to top-tier auditors who can help ensure the security and reliability of your integration. This step is essential for maintaining the integrity of your project and maximizing the benefits of using Pragma.
+## Integration Risks
+
+<Steps>
+  <Step title="Thorough Evaluation">
+    We're passionate about Pragma and eager to assist you with integrating our oracle. However, it's crucial to have a thorough process for evaluating the security of the integration.
+  </Step>
+  <Step title="Code Auditing">
+    All code must be rigorously tested and audited, particularly:
+    
+    <Check>
+      The imports used to integrate the oracle
+    </Check>
+    <Check>
+      The code that interacts with the oracle
+    </Check>
+    <Check>
+      The logic that leverages the oracle's data
+    </Check>
+  </Step>
+  <Step title="Expert Assistance">
+    We'd be happy to introduce you to top-tier auditors who can help ensure the security and reliability of your integration.
+  </Step>
+</Steps>
+
+<Warning>
+This auditing step is essential for maintaining the integrity of your project and maximizing the benefits of using Pragma.
+</Warning>
+
+## Risk Mitigation Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Back-testing" icon="chart-line">
+    Thoroughly test your integration using Pragma's historical data
+  </Card>
+  <Card title="Multiple Data Sources" icon="layer-group">
+    Consider implementing failsafes with secondary data sources
+  </Card>
+  <Card title="Circuit Breakers" icon="circle-stop">
+    Implement circuit breakers to halt operations during extreme market conditions
+  </Card>
+  <Card title="Regular Monitoring" icon="eye">
+    Set up continuous monitoring of feed performance and reliability
+  </Card>
+</CardGroup>
+
+<Tip>
+Contact our team to discuss risk mitigation strategies specific to your project needs.
+</Tip>

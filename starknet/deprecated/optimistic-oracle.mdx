@@ -1,0 +1,71 @@
+---
+title: Optimistic Oracle
+description: "Asserts and verifies real-world state"
+---
+
+<Warning>
+    This service is deprecated and is no longer available.
+    If you need are building a prediction market or anything that requires an optimistic oracle,
+    let us know and we can help you set up a custom solution.
+</Warning>
+
+<Info>
+    This feature is currently under development. Content may be incomplete or subject to change.
+</Info>
+
+An optimistic oracle is a decentralized mechanism in blockchain and Web3 systems that enables rapid inclusion of off-chain data or computation results on-chain without immediate verification. It operates on the principle of "optimistic" trust, assuming submitted data is correct unless challenged within a specified timeframe. If unchallenged, the data is considered valid; if disputed, it undergoes a verification process.
+
+This approach significantly reduces the latency and cost associated with bringing external information on-chain, as it only requires full verification in cases of disagreement.
+
+Optimistic oracles are particularly useful for complex computations, large datasets, or frequently updated information, enabling more efficient and scalable blockchain applications while maintaining a high degree of trust and security.
+
+### Optimistic Oracle
+
+You can find Pragma's first implementation of the Optimistic Oracle on Starknet [here](https://github.com/astraly-labs/Optimistic-Oracle/tree/main), following [UMA](https://docs.uma.xyz/protocol-overview/how-does-umas-oracle-work)'s general interface.
+
+Our Optimistic Oracle works by making a truth claim about the world, stating that something has happened or is true. Once asserted, the assertion enters a challenge period during which someone can dispute it. If no one disputes it during the challenge window, the statement is taken as true. In case of a dispute, the data verification mechanism intervenes.
+
+The first iteration of the optimistic oracle is deployed on the following addresses:
+
+| Network          | Address                                                           | Explorer                                                                                                                                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Starknet Sepolia | 0x44ac84b04789b0a2afcdd2eb914f0f9b767a77a95a019ebaadc28d6cacbaeeb | [Starkscan](https://sepolia.starkscan.co/contract/0x44ac84b04789b0a2afcdd2eb914f0f9b767a77a95a019ebaadc28d6cacbaeeb) [Voyager](https://sepolia.voyager.online/contract/0x44ac84b04789b0a2afcdd2eb914f0f9b767a77a95a019ebaadc28d6cacbaeeb#accountCalls) |
+
+### General Process
+
+<Steps>
+
+<Step title="Assertion Submission">
+An Asserter submits a bonded assertion about a real-world state. The assertion must include:
+
+- **Identifier**: The specific price identifier being asserted
+- **Timestamp**: When the asserted fact occurred
+- **Claim**: Additional contextual information about the assertion
+- **Currency**: The ERC20 token used for rewards and fees (must be DVM-approved)
+- **Bond**: The stake amount backing the assertion's accuracy
+</Step>
+
+<Step title="Dispute Window">
+During this phase:
+
+- A predefined "liveness period" begins
+- Disputers can challenge the assertion during this time
+- Disputers may use their own off-chain price feeds and methodologies to verify the assertion
+- The assertion remains in this state until either disputed or the window closes
+</Step>
+
+<Step title="Resolution">
+The assertion can be resolved in one of two ways:
+
+**If Disputed:**
+- The assertion is forwarded to the Data Verification Mechanism
+- Arbitration process begins
+- Final outcome is determined through verification
+
+**If Undisputed:**
+- The assertion automatically becomes valid
+- Completion occurs after liveness period ends
+- The asserted state is accepted as truth
+</Step>
+
+</Steps>
