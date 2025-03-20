@@ -3,45 +3,69 @@ title: "Introduction"
 description: "Welcome to the Pragma Node API documentation"
 ---
 
-# Pragma Node API
+<Frame>
+  <img
+    height="100%"
+    width="100%"
+    src="/images/flowchart/Pragmapi.webp"
+    alt="Pragma API Flow Diagram"
+    title="Overview of PragmaAPI"
+  />
+</Frame>
 
-Pragma offers a highly accurate, readily available, and fast API built on our extensive network of data providers. This empowers developers to drive the evolution of next-generation applications. Our API provides the most reliable prices and financial data at the highest frequency possible. 
+Pragma offers a highly accurate, readily available, and fast API built on our extensive network of data providers. This empowers developers to drive the evolution of next-generation applications. Our API provides the most reliable prices and financial data at the highest frequency possible.
 
-Here's how it works:
+## Key Features
 
-<img
-  height="100%"
-  width="100%"
-  src="/images/flowchart/Pragmapi.webp"
-  alt=""
-  title="Overview of PragmaAPI"
-/>
+<CardGroup cols={2}>
+  <Card title="Real-Time Updates" icon="bolt">
+    Access to market data with millisecond latency, ensuring your applications always have the most current information for critical decision-making.
+  </Card>
+  <Card title="Permissionless Architecture" icon="lock-open">
+    Our API is designed to be openly accessible, allowing anyone to build on our infrastructure without gatekeeping or excessive restrictions.
+  </Card>
+  <Card title="Battle-Tested Reliability" icon="shield-check">
+    Thoroughly tested in high-stakes environments with proven performance during market volatility and network congestion.
+  </Card>
+  <Card title="Feature Complete" icon="check-circle">
+    Comprehensive set of endpoints covering all your data needs with consistent response formats and thorough documentation.
+  </Card>
+</CardGroup>
 
 ## Base URL
 
-<Tip>
-  We recommend you use the **Development** endpoint until you are confident about going to production.
-</Tip>
-
-**Development**
-
-```
-https://api.devnet.pragma.build/node/v1
-```
-
-**Production**
-
-```
-https://api.production.pragma.build/node/v1
-```
+<Tabs>
+  <Tab title="Development">
+    <CodeGroup>
+      ```bash
+      https://api.devnet.pragma.build/node/v1
+      ```
+    </CodeGroup>
+    <Tip>
+      We recommend you use the **Development** endpoint until you are confident about going to production.
+    </Tip>
+  </Tab>
+  <Tab title="Production">
+    <CodeGroup>
+      ```bash
+      https://api.production.pragma.build/node/v1
+      ```
+    </CodeGroup>
+    <Warning>
+      Only switch to the Production endpoint when your application is fully tested and ready for deployment.
+    </Warning>
+  </Tab>
+</Tabs>
 
 ## Authentication
 
 Most endpoints require authentication using an API key. Include your API key in the request headers:
 
+<CodeGroup>
 ```bash
 X-API-KEY: <YOUR_API_KEY>
 ```
+</CodeGroup>
 
 <Note>
   We are currently still in private beta, DM us on [twitter](https://x.com/pragmaoracle) or [telegram](https://t.me/bglabs) to get your own api key.
@@ -51,6 +75,129 @@ X-API-KEY: <YOUR_API_KEY>
 
 Our API is divided into the following categories:
 
-- **Offchain** - Access to aggregated price data and real-time market information
-- **Onchain** - Interact with on-chain price feeds and historical data
-- **WebSocket** - Real-time data streaming capabilities
+<AccordionGroup>
+  <Accordion icon="chart-line" title="Offchain">
+    Access to aggregated price data and real-time market information across multiple sources.
+    
+    <CardGroup cols={2} className="mt-4">
+      <Card title="Price Discovery">
+        Get accurate market prices from multiple aggregated sources
+      </Card>
+      <Card title="Market Analysis">
+        Access comprehensive data for technical and fundamental analysis
+      </Card>
+      <Card title="Trading Algorithms">
+        Power your automated trading strategies with reliable data
+      </Card>
+      <Card title="Risk Management">
+        Monitor market conditions to optimize your risk exposure
+      </Card>
+    </CardGroup>
+  </Accordion>
+  
+  <Accordion icon="link" title="Onchain">
+    Interact with on-chain price feeds and historical data directly from blockchain sources.
+    
+    <CardGroup cols={2} className="mt-4">
+      <Card title="Historical Price Lookups">
+        Query verified historical price data points
+      </Card>
+      <Card title="Merkle Proof Verification">
+        Validate data integrity with cryptographic proofs
+      </Card>
+      <Card title="Oracle Data Access">
+        Direct integration with Pragma's oracle infrastructure
+      </Card>
+      <Card title="Smart Contract Integration">
+        Helper functions for seamless blockchain application development
+      </Card>
+    </CardGroup>
+  </Accordion>
+  
+  <Accordion icon="bolt" title="WebSocket">
+    Real-time data streaming capabilities for instant updates without polling.
+    
+    <CardGroup cols={2} className="mt-4">
+      <Card title="Low-Latency Updates">
+        Receive price changes as they happen with minimal delay
+      </Card>
+      <Card title="Event-Driven Architecture">
+        Build responsive applications that react to market changes
+      </Card>
+      <Card title="Reduced API Call Overhead">
+        Maintain open connections instead of frequent polling
+      </Card>
+      <Card title="Connection Monitoring">
+        Track connection status and health with built-in diagnostics
+      </Card>
+    </CardGroup>
+  </Accordion>
+</AccordionGroup>
+
+## Getting Started
+
+<Steps>
+  <Step title="Get Your API Key">
+    Reach out to us on [Twitter](https://x.com/pragmaoracle) or [Telegram](https://t.me/bglabs) to request access to our private beta.
+  </Step>
+  <Step title="Choose Your Environment">
+    Start with our Development environment for testing your integration.
+  </Step>
+  <Step title="Make Your First Request">
+    Use our example code snippets to make your first API call:
+    
+    <CodeGroup>
+    ```javascript JavaScript
+    const response = await fetch('https://api.devnet.pragma.build/node/v1/prices/latest?pair=BTC-USD', {
+      method: 'GET',
+      headers: {
+        'X-API-KEY': 'your-api-key-here'
+      }
+    });
+    
+    const data = await response.json();
+    console.log(data);
+    ```
+    
+    ```python Python
+    import requests
+    
+    headers = {
+        'X-API-KEY': 'your-api-key-here'
+    }
+    
+    response = requests.get('https://api.devnet.pragma.build/node/v1/prices/latest?pair=BTC-USD', headers=headers)
+    data = response.json()
+    print(data)
+    ```
+    
+    ```rust Rust
+    use reqwest;
+    
+    #[tokio::main]
+    async fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let client = reqwest::Client::new();
+        let resp = client.get("https://api.devnet.pragma.build/node/v1/prices/latest?pair=BTC-USD")
+            .header("X-API-KEY", "your-api-key-here")
+            .send()
+            .await?;
+            
+        let data = resp.json::<serde_json::Value>().await?;
+        println!("{:#?}", data);
+        Ok(())
+    }
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Explore the Documentation">
+    Dive deeper into our comprehensive API documentation to discover all available endpoints and features.
+  </Step>
+</Steps>
+
+## Rate Limits
+
+<Info>
+  During our beta phase, we apply flexible rate limits based on your use case. Contact our team for details about your specific allocation.
+</Info>
+
+For production applications, we offer tiered plans with appropriate rate limits to meet your needs.

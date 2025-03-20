@@ -1,24 +1,148 @@
 ---
 title: Computational Feeds
-description: "What are computational feeds"
+description: "Advanced on-chain data calculations for sophisticated DeFi applications"
 ---
+
+<Card title="On-Chain Data Processing" icon="calculator">
+  Advanced financial metrics calculated directly on-chain using Pragma's trusted price data
+</Card>
+
+## Overview
 
 Pragma is an oracle fully on-chain. All the data that you consume through Pragma smart-contracts was aggregated from data that was pushed on-chain by reputable exchanges and market makers. This makes Pragma oracle transparent, and auditable, but also programmable. You can compose and program data with Cairo, in order to get the right computed data for your protocol.
 
 Pragma has designed compute engines that use the same raw market data underlying our price feeds, but calculate different metrics to produce feeds of processed data. We call these new feeds computational feeds. Since computational feeds operate entirely on-chain, they don't introduce any new security assumptions.
 
-You can find contract addresses below:
+## Available Computational Feeds
 
-### Mainnet
+<CardGroup cols={2}>
+  <Card title="Realized Volatility / TWAP" icon="chart-line">
+    <p>Calculates historical volatility and time-weighted average prices using on-chain price history.</p>
+    <p className="mt-2">
+      <strong>Use cases:</strong> Risk management, dynamic collateral requirements, automated market making
+    </p>
+  </Card>
+  <Card title="Yield Curve" icon="chart-scatter">
+    <p>Creates a crypto-native yield curve using verified data building blocks.</p>
+    <p className="mt-2">
+      <strong>Use cases:</strong> Term structure modeling, interest rate derivatives, lending protocols
+    </p>
+  </Card>
+</CardGroup>
 
-| Feed                      | Address                                                           | Explorer                                                                                                                                                                                                                                             |
-| ------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Realized Volatility/ TWAP | 0x49eefafae944d07744d07cc72a5bf14728a6fb463c3eae5bca13552f5d455fd | [Starkscan](https://starkscan.co/contract/0x49eefafae944d07744d07cc72a5bf14728a6fb463c3eae5bca13552f5d455fd#read-contract) [Voyager](https://voyager.online/contract/0x49eefafae944d07744d07cc72a5bf14728a6fb463c3eae5bca13552f5d455fd#readContract) |
-| Yield Curve               | ❌                                                                | [Starkscan](https://sepolia.starkscan.co/contract/x#read-contract) [Voyager](https://sepolia.voyager.online/contract/x#readContract)                                                                                                                 |
+## Contract Addresses
 
-### Sepolia
+<Tabs>
+  <Tab title="Mainnet">
+    <table>
+      <thead>
+        <tr>
+          <th>Feed</th>
+          <th>Address</th>
+          <th>Explorer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Realized Volatility / TWAP</td>
+          <td><code>0x49eefafae944d07744d07cc72a5bf14728a6fb463c3eae5bca13552f5d455fd</code></td>
+          <td>
+            <div className="flex space-x-3">
+              <a href="https://starkscan.co/contract/0x49eefafae944d07744d07cc72a5bf14728a6fb463c3eae5bca13552f5d455fd#read-write-contract" target="_blank" rel="noopener noreferrer">Starkscan</a>
+              <a href="https://voyager.online/contract/0x049eefafae944d07744d07cc72a5bf14728a6fb463c3eae5bca13552f5d455fd#readContract" target="_blank" rel="noopener noreferrer">Voyager</a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Yield Curve</td>
+          <td>❌</td>
+          <td>Coming soon</td>
+        </tr>
+      </tbody>
+    </table>
+  </Tab>
+  <Tab title="Sepolia Testnet">
+    <table>
+      <thead>
+        <tr>
+          <th>Feed</th>
+          <th>Address</th>
+          <th>Explorer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Realized Volatility / TWAP</td>
+          <td><code>0x0379afb83d2f8e38ab08252750233665a812a24278aacdde52475618edbf879c</code></td>
+          <td>
+            <div className="flex space-x-3">
+              <a href="https://sepolia.starkscan.co/contract/0x0379afb83d2f8e38ab08252750233665a812a24278aacdde52475618edbf879c#read-write-contract" target="_blank" rel="noopener noreferrer">Starkscan</a>
+              <a href="https://sepolia.voyager.online/contract/0x0379afb83d2f8e38ab08252750233665a812a24278aacdde52475618edbf879c#readContract" target="_blank" rel="noopener noreferrer">Voyager</a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Yield Curve</td>
+          <td>❌</td>
+          <td>Coming soon</td>
+        </tr>
+      </tbody>
+    </table>
+  </Tab>
+</Tabs>
 
-| Feed                      | Address                                                           | Explorer                                                                                                                                                                                                                                                             |
-| ------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Realized Volatility/ TWAP | 0x0379afb83d2f8e38ab08252750233665a812a24278aacdde52475618edbf879c | [Starkscan](https://sepolia.starkscan.co/contract/0x0379afb83d2f8e38ab08252750233665a812a24278aacdde52475618edbf879c#read-contract) [Voyager](https://sepolia.voyager.online/contract/0x0379afb83d2f8e38ab08252750233665a812a24278aacdde52475618edbf879c#readContract) |
-| Yield Curve               | ❌                                                                | [Starkscan](https://sepolia.starkscan.co/contract/x#read-contract) [Voyager](https://sepolia.voyager.online/contract/x#readContract)                                                                                                                                 |
+## Benefits of Computational Feeds
+
+<CardGroup cols={3}>
+  <Card title="Transparency" icon="eye">
+    All calculations are performed on-chain and fully auditable
+  </Card>
+  <Card title="Composability" icon="puzzle-piece">
+    Build more complex financial applications using verifiable metrics
+  </Card>
+  <Card title="Efficiency" icon="bolt">
+    Reduce gas costs by utilizing pre-computed metrics
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+<Accordion title="Volatility-Based Trading Strategies">
+  Volatility feeds enable the creation of dynamic trading strategies that adjust parameters based on market conditions:
+  
+  - Automatic position sizing based on recent volatility
+  - Dynamic fee adjustments for AMMs
+  - Risk-based collateral requirements for lending protocols
+</Accordion>
+
+<Accordion title="Yield Curve Applications">
+  On-chain yield curves open up new possibilities for DeFi:
+  
+  - Term structure modeling for fixed-rate lending
+  - Pricing of interest rate derivatives
+  - Advanced bond issuance mechanisms
+</Accordion>
+
+<Accordion title="Custom Computational Feeds">
+  Pragma's architecture allows for the creation of custom computational feeds:
+  
+  - Specialized risk metrics for your specific use case
+  - Bespoke financial calculations tailored to your protocol
+  - Integration with existing smart contracts
+</Accordion>
+
+<br />
+<br />
+
+<Card title="Get Started" icon="rocket">
+  <div className="flex items-center justify-between">
+    <div>
+      Ready to integrate computational feeds into your protocol?
+    </div>
+    <div className="flex space-x-4">
+      <a href="https://twitter.com/PragmaOracle" className="text-blue-500 hover:text-blue-700">
+        Contact Team
+      </a>
+    </div>
+  </div>
+</Card>

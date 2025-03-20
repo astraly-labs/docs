@@ -1,85 +1,298 @@
 ---
 title: Lightspeed
 sidebarTitle: Lightspeed
+description: "Ultra-fast price data streaming without verification overhead"
 ---
 
-# What
+<Card title="High-Performance Price Streaming" icon="bolt" horizontal>
+  The fastest and most accurate market data with minimal overhead
+</Card>
 
-If all you need is the fastest and most accurate data in the market.
-Then, you're in the perfect place.
+## Overview
 
-This endpoint is very similar to our [StarkEx](./starkex) endpoint except it doesnt contain any metadata that would allow you to verify data's provenance.
-On the other hand it's slightly more efficient as it doesn't have the signature generation overhead.
+<Info>
+Lightspeed is optimized for performance, delivering price updates every 500 milliseconds without the verification overhead of our other endpoints.
+</Info>
 
-# How
+This endpoint is very similar to our [StarkEx](./starkex) endpoint except it doesn't contain any metadata that would allow you to verify data's provenance. The trade-off provides significantly improved performance by eliminating signature generation overhead.
 
-Open a websocket connection on the environment of your choice.
+<Tabs>
+  <Tab title="Key Features">
+    <CardGroup cols={3}>
+      <Card title="Ultra-Low Latency" icon="bolt">
+        Updates every 500ms with minimal processing overhead
+      </Card>
+      <Card title="High Accuracy" icon="bullseye">
+        Aggregated from multiple premium sources
+      </Card>
+      <Card title="Simplified Format" icon="arrows-minimize">
+        Streamlined JSON responses for easier integration
+      </Card>
+    </CardGroup>
+  </Tab>
+  <Tab title="Use Cases">
+    <CardGroup cols={2}>
+      <Card title="Trading Applications" icon="chart-line">
+        Perfect for applications where microseconds matter and external verification isn't required
+      </Card>
+      <Card title="Market Monitoring" icon="eye">
+        Real-time dashboard applications requiring immediate price updates
+      </Card>
+      <Card title="Alert Systems" icon="bell">
+        Price notification systems that need to react instantly to market changes
+      </Card>
+      <Card title="Performance-First Systems" icon="gauge-high">
+        Systems where latency is the primary concern over provenance verification
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
 
-e.g
-```bash
-wscat -c wss://ws.devnet.pragma.build/node/v1/price/subscribe
-```
+## Connection
 
-Sending a request to this endpoint establishes a channel to receive real-time data updates every 500 milliseconds.
+<Steps>
+  <Step title="Open WebSocket Connection">
+    Connect to our WebSocket endpoint on your preferred environment:
+    
+    <CodeGroup>
+    ```bash Development
+    wscat -c wss://ws.devnet.pragma.build/node/v1/price/subscribe
+    ```
+    
+    ```bash Production
+    wscat -c wss://ws.production.pragma.build/node/v1/price/subscribe
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Subscribe to Asset Pairs">
+    By default, no asset pairs are subscribed. Send a subscription message to start receiving data.
+  </Step>
+  <Step title="Receive Real-Time Updates">
+    Once subscribed, you'll receive price updates every 500 milliseconds for your selected pairs.
+  </Step>
+</Steps>
 
-## Subscribing
+## Subscription Management
 
-By default, no asset pairs are subscribed. To subscribe to specific pairs, send a message formatted as follows:
+### Subscribing to Pairs
 
-```json
+<CodeGroup>
+```json Request
 {
   "msg_type": "subscribe",
   "pairs": ["BTC/USD", "ETH/USD:MARK"]
 }
 ```
 
-The server will confirm your subscription with a response like this:
-
-```json
+```json Response
 {
   "msg_type": "subscribe",
-  // the pairs you are currently subscribed to, here we were already
-  // subscribed to SOL/USD
   "pairs": ["BTC/USD", "ETH/USD:MARK", "SOL/USD"]
 }
 ```
+</CodeGroup>
 
-## Unsubscribing
+<Note>
+The response includes all pairs you are currently subscribed to, including any previous subscriptions not mentioned in your latest request.
+</Note>
 
-To unsubscribe from specific pairs, send a message formatted as follows:
+### Unsubscribing from Pairs
 
-```json
+<CodeGroup>
+```json Request
 {
   "msg_type": "unsubscribe",
   "pairs": ["BTC/USD"]
 }
 ```
 
-The server will confirm your unsubscription with a response like this:
-
-```json
+```json Response
 {
   "msg_type": "unsubscribe",
-  // the pairs you are currently subscribed to
-  "pairs": ["ETH/USD:MARK"]
+  "pairs": ["ETH/USD:MARK", "SOL/USD"]
 }
 ```
+</CodeGroup>
 
-## Response Format
+<Warning>
+If you close your WebSocket connection, all your subscriptions will be automatically cleared. You'll need to resubscribe when reconnecting.
+</Warning>
 
-Subscribed data will be provided in the following JSON format for each asset pair:
+## Data Format
 
-```json
+<CodeGroup>
+```json Example Price Update
 {
   "pair_id": "0x12345",
   "price": "10000000000000001",
-  "num_sources_aggregated": "8",
+  "num_sources_aggregated": "8"
 }
 ```
+</CodeGroup>
 
-**Field Descriptions**:
+### Field Reference
 
-- `pair_id`: Unique identifier for the asset encoded using the pair name.
-- `price`: The median price of the asset.
-- `num_sources_aggregated`: The number of sources that were aggregated for computing the median within the bucket.
+<Properties>
+  <Property name="pair_id" type="string">
+    Unique identifier for the asset encoded using the pair name.
+  </Property>
+  <Property name="price" type="string">
+    The median price of the asset represented as a string to preserve precision.
+  </Property>
+  <Property name="num_sources_aggregated" type="string">
+    The number of sources that were aggregated for computing the median price.
+  </Property>
+</Properties>
 
+<Tip>
+All numeric values are returned as strings to preserve precision, especially for assets with very small or very large prices.
+</Tip>
+
+## Implementation Examples
+
+<Tabs>
+  <Tab title="JavaScript">
+    ```javascript example.js [expandable]
+    const WebSocket = require('ws');
+    
+    // Connect to Lightspeed endpoint
+    const ws = new WebSocket('wss://ws.devnet.pragma.build/node/v1/price/subscribe');
+    
+    // Subscribe to pairs on connection open
+    ws.on('open', function open() {
+      console.log('Connected to Lightspeed API');
+      
+      // Subscribe to specific pairs
+      const subscribeMsg = {
+        msg_type: "subscribe",
+        pairs: ["BTC/USD", "ETH/USD"]
+      };
+      
+      ws.send(JSON.stringify(subscribeMsg));
+    });
+    
+    // Handle incoming messages
+    ws.on('message', function incoming(data) {
+      const message = JSON.parse(data);
+      
+      // Handle subscription confirmations
+      if (message.msg_type === "subscribe" || message.msg_type === "unsubscribe") {
+        console.log(`${message.msg_type} confirmation:`, message.pairs);
+        return;
+      }
+      
+      // Handle price updates
+      console.log(`Price update for ${message.pair_id}:`, {
+        price: message.price,
+        sources: message.num_sources_aggregated
+      });
+      
+      // Process price data as needed
+      // ...
+    });
+    
+    // Handle errors and disconnections
+    ws.on('error', function error(err) {
+      console.error('Connection error:', err);
+    });
+    
+    ws.on('close', function close() {
+      console.log('Connection closed');
+    });
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python example.py [expandable]
+    import json
+    import websocket
+    
+    # Define callbacks
+    def on_message(ws, message):
+        data = json.loads(message)
+        
+        # Handle subscription confirmations
+        if data.get('msg_type') in ['subscribe', 'unsubscribe']:
+            print(f"{data['msg_type']} confirmation: {data['pairs']}")
+            return
+            
+        # Handle price updates
+        print(f"Price update for {data['pair_id']}: {data['price']} (from {data['num_sources_aggregated']} sources)")
+        
+        # Process price data as needed
+        # ...
+    
+    def on_error(ws, error):
+        print(f"Error: {error}")
+    
+    def on_close(ws, close_status_code, close_msg):
+        print(f"Connection closed: {close_status_code} - {close_msg}")
+    
+    def on_open(ws):
+        print("Connection established")
+        
+        # Subscribe to specific pairs
+        subscribe_msg = {
+            "msg_type": "subscribe",
+            "pairs": ["BTC/USD", "ETH/USD"]
+        }
+        
+        ws.send(json.dumps(subscribe_msg))
+    
+    # Connect to Lightspeed endpoint
+    if __name__ == "__main__":
+        websocket.enableTrace(True)  # For debugging
+        ws = websocket.WebSocketApp("wss://ws.devnet.pragma.build/node/v1/price/subscribe",
+                                   on_open=on_open,
+                                   on_message=on_message,
+                                   on_error=on_error,
+                                   on_close=on_close)
+        
+        ws.run_forever()
+    ```
+  </Tab>
+</Tabs>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Implement Reconnection Logic" icon="rotate">
+    WebSocket connections can drop for various reasons. Always implement automatic reconnection with backoff strategy.
+  </Card>
+  <Card title="Process Updates Asynchronously" icon="gears">
+    Handle price updates asynchronously to avoid blocking the WebSocket receive thread, especially in high-frequency scenarios.
+  </Card>
+  <Card title="Batch Subscription Changes" icon="layer-group">
+    When subscribing to multiple pairs, send them in a single message rather than separate requests.
+  </Card>
+  <Card title="Monitor Connection Health" icon="heart-pulse">
+    Implement periodic health checks and heartbeat monitoring to ensure your connection stays active.
+  </Card>
+</CardGroup>
+
+## Comparison with Starkex
+
+<CardGroup cols={2}>
+  <Card title="Lightspeed" icon="bolt">
+    <ul className="list-none space-y-2 mt-2">
+      <li>✓ Minimal payload size</li>
+      <li>✓ Optimized for performance</li>
+      <li>✓ Lower latency</li>
+      <li>✓ Ideal for trading applications</li>
+      <li>❌ No verification metadata</li>
+    </ul>
+  </Card>
+  
+  <Card title="Starkex" icon="shield-check">
+    <ul className="list-none space-y-2 mt-2">
+      <li>✓ Includes cryptographic signatures</li>
+      <li>✓ Verifiable price data</li>
+      <li>✓ Individual publisher prices</li>
+      <li>✓ Ideal for StarkEx integration</li>
+      <li>⚠️ Slightly larger payload size</li>
+    </ul>
+  </Card>
+</CardGroup>
+
+<Tip>
+Choose Lightspeed when performance is your primary concern and Starkex when data provenance verification is required.
+</Tip>

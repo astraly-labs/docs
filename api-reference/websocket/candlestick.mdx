@@ -1,74 +1,193 @@
 ---
 title: Candlestick
 sidebarTitle: Candlestick
+description: "Real-time OHLC (Open, High, Low, Close) data for market analysis"
 ---
 
-# What
+<Card title="Real-Time OHLC Data" icon="chart-candlestick">
+  Access high-quality candlestick data for technical analysis and trading applications
+</Card>
 
-Looking for [OHLC]() data ? You're at the right place.
+## Overview
+
+Looking for [OHLC](https://en.wikipedia.org/wiki/Open-high-low-close_chart) data? You're at the right place. The Candlestick API provides real-time access to Open, High, Low, and Close price data at various time intervals.
 
 <Note>
-    For now we only suport ohlc data for `onchain` data but it will soon be available for `offchain` data aswell.
+  Currently, we only support OHLC data for `onchain` data, but it will soon be available for `offchain` data as well.
 </Note>
 
-# How
+## Connection
 
-Open a websocket connection on the environment of your choice.
+<Steps>
+  <Step title="Open WebSocket Connection">
+    Connect to our WebSocket endpoint on your preferred environment:
+    
+    <CodeGroup>
+    ```bash Development
+    wscat -c wss://ws.devnet.pragma.build/node/v1/onchain/ohlc/subscribe
+    ```
+    
+    ```bash Production
+    wscat -c wss://ws.production.pragma.build/node/v1/onchain/ohlc/subscribe
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Subscribe to Asset Pair">
+    Send a subscription message with your desired pair, network, interval, and number of candles.
+  </Step>
+  <Step title="Receive OHLC Updates">
+    Once subscribed, you'll receive candlestick data at your specified interval.
+  </Step>
+</Steps>
 
-e.g
-```bash
-wscat -c wss://ws.devnet.pragma.build/node/v1/onchain/ohlc/subscribe
-```
+## Subscription Management
 
-Sending a request to this endpoint establishes a channel to receive real-time OHLC data updates at the given frequency.
+### Subscribing to a Pair
 
-## Subscribing
+<Info>
+  You can only subscribe to one pair at a time. Subscribing to a new pair will automatically replace your current subscription.
+</Info>
 
-By default, no asset pair is subscribed. To subscribe to a specific pair, send a message formatted as follows:
-
-```json
+<CodeGroup>
+```json Request
 {
   "msg_type": "subscribe",
   "pair": "BTC/USD",
   "network": "mainnet",
   "interval": "1min",
-  "candles_to_get": "100" // Defaults to `10`
+  "candles_to_get": "100" // Optional, defaults to 10
 }
 ```
 
-The server will confirm your subscription with a response like this:
-
-```json
+```json Response
 {
   "msg_type": "subscribe",
-  // We can only subscribe to one pair at a time
   "pair": "BTC/USD",
   "network": "mainnet",
-  "interval": "1min",
+  "interval": "1min"
 }
 ```
+</CodeGroup>
 
-When re-subscribing, it will override the current pair which you are subscribed to, if any.
+### Available Parameters
 
-## Response Format
+| Parameter | Type | Required | Default | Description |
+| --------- | ---- | -------- | ------- | ----------- |
+| `pair` | string | Yes | - | The trading pair you want to subscribe to (e.g., "BTC/USD") |
+| `network` | string | Yes | - | The blockchain network to fetch data from (e.g., "mainnet") |
+| `interval` | string | Yes | - | Time interval for each candle. Options include: "1min", "5min", "15min", "30min", "1hour", "4hour", "1day", "1week" |
+| `candles_to_get` | string | No | "10" | Number of historical candles to receive on initial subscription |
 
-Subscribed data will be provided in the following JSON format for each asset pair:
+### Unsubscribing
 
-```json
-TODO
-```
+To stop receiving updates for your current subscription:
 
-## Unsubscribing
-
-To unsubscribe from specific pairs, send a message formatted as follows:
-
-```json
+<CodeGroup>
+```json Request
 {
   "msg_type": "unsubscribe",
   "pair": "BTC/USD",
   "network": "mainnet",
-  "interval": "1min",
+  "interval": "1min"
 }
 ```
+</CodeGroup>
 
-The server will unsubscribe you for the pair without sending any acknowledgement.
+<Warning>
+  The server will unsubscribe you without sending any acknowledgment. Your connection will remain open but you'll stop receiving updates.
+</Warning>
+
+## Data Format
+
+<CodeGroup>
+```json Example OHLC Response
+{
+  "msg_type": "ohlc_update",
+  "pair": "BTC/USD",
+  "network": "mainnet",
+  "interval": "1min",
+  "candles": [
+    {
+      "time": "2025-03-20T19:28:00",
+      "open": "8407026302914",
+      "high": "8407026302914",
+      "low": "8407026302914",
+      "close": "8407026302914"
+    },
+    {
+      "time": "2025-03-20T19:27:00",
+      "open": "8408636029312",
+      "high": "8408636029312",
+      "low": "8408636029312",
+      "close": "8408636029312"
+    },
+    {
+      "time": "2025-03-20T19:26:00",
+      "open": "8410101544145",
+      "high": "8410101544145",
+      "low": "8410101544145",
+      "close": "8410101544145"
+    }
+    // Additional candles...
+  ]
+}
+```
+</CodeGroup>
+
+### Candle Fields
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `time` | string | ISO 8601 timestamp marking the start of the candle period |
+| `open` | string | Opening price for the period (in raw price format) |
+| `high` | string | Highest price reached during the period (in raw price format) |
+| `low` | string | Lowest price reached during the period (in raw price format) |
+| `close` | string | Closing price for the period (in raw price format) |
+
+
+
+## Available Intervals
+
+<CardGroup cols={4}>
+  <Card title="1min">
+    One-minute candles
+  </Card>
+  <Card title="5min">
+    Five-minute candles
+  </Card>
+  <Card title="15min">
+    Fifteen-minute candles
+  </Card>
+  <Card title="30min">
+    Thirty-minute candles
+  </Card>
+  <Card title="1hour">
+    One-hour candles
+  </Card>
+  <Card title="4hour">
+    Four-hour candles
+  </Card>
+  <Card title="1day">
+    Daily candles
+  </Card>
+  <Card title="1week">
+    Weekly candles
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Start with Small Requests" icon="minimize">
+    Begin with smaller time intervals and fewer candles to ensure smooth performance
+  </Card>
+  <Card title="Handle Reconnections" icon="rotate">
+    Implement reconnection logic with subscription restoration when connections drop
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation">
+    Add robust error handling for network issues and malformed responses
+  </Card>
+  <Card title="Data Storage" icon="database">
+    Consider implementing local storage to cache historical candles when appropriate
+  </Card>
+</CardGroup>

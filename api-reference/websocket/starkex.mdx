@@ -1,106 +1,125 @@
 ---
 title: "Starkex"
 sidebarTitle: "Starkex"
+description: "Real-time price data with cryptographic verification for StarkEx integrations"
 ---
 
-# What
+<Card title="Verified Price Feeds" icon="shield-check">
+  Perfect for StarkEx integrations and applications requiring cryptographic verification of price data
+</Card>
 
-If you are building on [StarkEx]() or you need some sort of verification mechanism, this is probably
-the right endpoint for you.
+## Overview
 
-# How
+If you are building on [StarkEx](https://starkware.co/starkex/) or need a robust verification mechanism for price data, this endpoint provides real-time feeds with cryptographic signatures to ensure data integrity and provenance.
 
-Open a websocket connection on the environment of your choice.
+## Connection
 
-```bash
-wscat -c wss://ws.devnet.pragma.build/node/v1/data/subscribe
-```
+<Steps>
+  <Step title="Open WebSocket Connection">
+    Connect to our WebSocket endpoint on your preferred environment:
+    
+    <CodeGroup>
+    ```bash Development
+    wscat -c wss://ws.devnet.pragma.build/node/v1/data/subscribe
+    ```
+    
+    ```bash Production
+    wscat -c wss://ws.production.pragma.build/node/v1/data/subscribe
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Subscribe to Asset Pairs">
+    Send a subscription message to start receiving updates every 500 milliseconds.
+  </Step>
+</Steps>
 
-Sending a request to this endpoint establishes a channel to receive real-time data updates every 500 milliseconds.
+## Subscription Management
 
-## Subscribing
+### Subscribing to Pairs
 
-By default, no asset pairs are subscribed. To subscribe to specific pairs, send a message formatted as follows:
-
-```json
+<CodeGroup>
+```json Request
 {
   "msg_type": "subscribe",
   "pairs": ["BTC/USD", "ETH/USD:MARK"]
 }
 ```
 
-The server will confirm your subscription with a response like this:
-
-```json
+```json Response
 {
   "msg_type": "subscribe",
-  // the pairs you are currently subscribed to, here we were already
-  // subscribed to SOL/USD
   "pairs": ["BTC/USD", "ETH/USD:MARK", "SOL/USD"]
 }
 ```
+</CodeGroup>
 
-We currently support two types of subscriptions:
+<Note>
+The response includes all pairs you are currently subscribed to, including any previous subscriptions not mentioned in your latest request.
+</Note>
 
-<Tabs>
-  <Tab title="Index Price">
-    #### Index price
+### Unsubscribing from Pairs
 
-    Median price for spot markets across supported exchanges.
-
-    <Note>
-      By default, subscriptions are for index prices.
-
-      It means subscribing to a pair without specifying the type will subscribe to the index price. For example, to subscribe to the index price of BTC/USD, use `BTC/USD`.
-    </Note>
-  </Tab>
-  <Tab title="Mark Price">
-    #### Mark Price
-
-    The mark price is the median perp price across supported exchanges.
-
-    **For assets quoted in a stablecoin, we compute as follow**:
-
-    1. Determine the median perp price of the asset quoted in the stablecoin.
-    2. Determine the median spot price of the stablecoin in USD.
-    3. Divide the median perp price by the median spot price of the stablecoin in USD.
-
-    **For assets quoted in USD**:
-
-    Determine the median perp price of the asset quoted in USD.
-
-    <Note>
-      To subscribe to a specific mark price, append `:MARK` to the pair name. For example, to subscribe to the perpetual index price of ETH/USD, use `ETH/USD:MARK`.
-    </Note>
-  </Tab>
-</Tabs>
-
-## Unsubscribing
-
-To unsubscribe from specific pairs, send a message formatted as follows:
-
-```json
+<CodeGroup>
+```json Request
 {
   "msg_type": "unsubscribe",
   "pairs": ["BTC/USD"]
 }
 ```
 
-The server will confirm your unsubscription with a response like this:
-
-```json
+```json Response
 {
   "msg_type": "unsubscribe",
-  // the pairs you are currently subscribed to
   "pairs": ["ETH/USD:MARK"]
 }
 ```
+</CodeGroup>
 
-## Response Format
+## Price Types
 
-Subscribed data will be provided in the following JSON format for each asset pair:
+<Tabs>
+  <Tab title="Index Price">
+    <Card>
+      <p>Median price from spot markets across supported exchanges.</p>
+      <p className="font-semibold mt-2">Format Example: <code>BTC/USD</code></p>
+    </Card>
+    
+    <Note>
+      By default, subscriptions are for index prices. Subscribing to a pair without specifying the type will subscribe to the index price.
+    </Note>
+  </Tab>
+  <Tab title="Mark Price">
+    <Card>
+      <p>Median price from perpetual markets across supported exchanges.</p>
+      <p className="font-semibold mt-2">Format Example: <code>ETH/USD:MARK</code></p>
+    </Card>
+    
+    <div className="mt-4">
+      <p className="font-semibold">Calculation Method:</p>
+      
+      <p className="mt-2">For assets quoted in a stablecoin:</p>
+      <ol className="list-decimal pl-5 mt-1">
+        <li>Determine the median perp price of the asset quoted in the stablecoin</li>
+        <li>Determine the median spot price of the stablecoin in USD</li>
+        <li>Divide the median perp price by the median spot price of the stablecoin in USD</li>
+      </ol>
+      
+      <p className="mt-2">For assets quoted in USD:</p>
+      <ul className="list-disc pl-5 mt-1">
+        <li>Determine the median perp price of the asset quoted in USD</li>
+      </ul>
+    </div>
+    
+    <Note>
+      To subscribe to a mark price, append <code>:MARK</code> to the pair name (e.g., <code>ETH/USD:MARK</code>).
+    </Note>
+  </Tab>
+</Tabs>
 
-```json
+## Data Format
+
+<CodeGroup>
+```json Example Price Update
 {
   "global_asset_id": "0x12345",
   "median_price": "10000000000000001",
@@ -123,92 +142,115 @@ Subscribed data will be provided in the following JSON format for each asset pai
   ]
 }
 ```
+</CodeGroup>
 
-**Field Descriptions**:
+### Field Reference
 
-- `global_asset_id`: Unique identifier for the asset encoded using the pair name.
-- `median_price`: The median price of the asset.
-- `signature`: Signature of the median price by the Pragma oracle.
-- `signed_prices`: Array of the prices used to compute the median price:
-  - `oracle_asset_id`: Unique identifier encoded using the pair and the publisher names.
-  - `oracle_price`: Price provided by the oracle.
-  - `signing_key`: Key used by the oracle to sign the price.
-  - `timestamp`: Time when the price was recorded.
-  - `signature`: Signature of the price by our publisher.
-
-## Example
-
-### Rust
-
-We have already cooked a nice ratatui for you to test the endpoint, you can find it [here](https://github.com/astraly-labs/pragma-node/blob/dev/pragma-node/examples/starkex.rs).
-
-Simply clone the `pragma-node` repository and run
-
-```bash
-cargo run --example starkex
-```
-
-### Python
-
-You can use the following Python code to connect to the Pragma websocket endpoint and subscribe to the `TIA/USD` index price:
-
-```python main.py [expandable]
-import asyncio
-import websockets
-import json
-from websockets.exceptions import ConnectionClosedError
-
-PRAGMA_API_BASE_URL = "ws.devnet.pragma.build"
-URI = f"node/v1/data/subscribe"
-WS_URL = f"ws://{PRAGMA_API_BASE_URL}/${URI}"
-
-SUBSCRIBE_MESSAGE = {"msg_type": "subscribe", "pairs": ["TIA/USD"]}
-
-
-async def connect_to_websocket(uri):
-    """Establish a connection to the websocket server."""
-    try:
-        websocket = await websockets.connect(uri)
-        return websocket
-    except Exception as e:
-        print(f"Failed to connect to websocket: {e}")
-        return None
-
-async def subscribe_to_data(websocket, subscribe_message):
-    """Send subscription message to the websocket."""
-    try:
-        await websocket.send(json.dumps(subscribe_message))
-        print("Subscription message sent")
-    except Exception as e:
-        print(f"Failed to send subscription message: {e}")
-
-async def handle_messages(websocket):
-    """Handle incoming messages from the websocket."""
-    try:
-        async for message in websocket:
-            print(f"Received message: {message}")
-    except ConnectionClosedError:
-        print("Connection closed")
-    except Exception as e:
-        print(f"Error receiving message: {e}")
-
-async def consume_data(uri, subscribe_message):
-    """Main function to consume data from websocket."""
-    websocket = await connect_to_websocket(uri)
-    if websocket:
-        await subscribe_to_data(websocket, subscribe_message)
-        await handle_messages(websocket)
-        await websocket.close()
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(consume_data(URI, SUBSCRIBE_MESSAGE))
-    except KeyboardInterrupt:
-        print("Program interrupted")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-```
+| Field | Description |
+| ----- | ----------- |
+| `global_asset_id` | Unique identifier for the asset encoded using the pair name |
+| `median_price` | The median price of the asset |
+| `signature` | Signature of the median price by the Pragma oracle |
+| `signed_prices` | Array of the prices used to compute the median price |
+| `oracle_asset_id` | Unique identifier encoded using the pair and publisher names |
+| `oracle_price` | Price provided by the oracle |
+| `signing_key` | Key used by the oracle to sign the price |
+| `timestamp` | Time when the price was recorded |
+| `signature` | Signature of the price by our publisher |
 
 <Info>
-  Replace `PRAGMA_API_BASE_URL` with the base URL of the Pragma API.
+All numeric values are returned as strings to preserve precision, especially for assets with very small or very large prices.
 </Info>
+
+## Integration Examples
+
+<Tabs>
+  <Tab title="Rust">
+    <div className="mb-4">
+      We've created a ready-to-use example with a terminal UI for testing this endpoint:
+    </div>
+    
+    <CodeGroup>
+    ```bash
+    # Clone the repository
+    git clone https://github.com/astraly-labs/pragma-node
+    
+    # Run the example
+    cargo run --example starkex
+    ```
+    </CodeGroup>
+  </Tab>
+  
+  <Tab title="Python">
+    <div className="mb-4">
+      Connect to the Pragma websocket endpoint and subscribe to the TIA/USD index price:
+    </div>
+    
+    <CodeGroup>
+    ```python
+    import asyncio
+    import websockets
+    import json
+    from websockets.exceptions import ConnectionClosedError
+    
+    async def connect_and_subscribe():
+        uri = "wss://ws.devnet.pragma.build/node/v1/data/subscribe"
+        
+        try:
+            # Connect to the websocket
+            async with websockets.connect(uri) as websocket:
+                # Subscribe to TIA/USD price
+                subscribe_msg = {
+                    "msg_type": "subscribe", 
+                    "pairs": ["TIA/USD"]
+                }
+                
+                await websocket.send(json.dumps(subscribe_msg))
+                print("Subscribed to TIA/USD")
+                
+                # Handle incoming messages
+                while True:
+                    message = await websocket.recv()
+                    data = json.loads(message)
+                    print(f"Received price update: {data}")
+                    
+        except ConnectionClosedError:
+            print("Connection closed unexpectedly")
+        except Exception as e:
+            print(f"Error: {e}")
+    
+    # Run the connection
+    if __name__ == "__main__":
+        asyncio.run(connect_and_subscribe())
+    ```
+    </CodeGroup>
+  </Tab>
+</Tabs>
+
+## Comparison with Lightspeed
+
+<CardGroup cols={2}>
+  <Card title="Starkex" icon="shield-check">
+    <ul className="list-none space-y-2 mt-2">
+      <li>✓ Includes cryptographic signatures</li>
+      <li>✓ Verifiable price data</li>
+      <li>✓ Individual publisher prices</li>
+      <li>✓ Ideal for StarkEx integration</li>
+      <li>⚠️ Slightly larger payload size</li>
+    </ul>
+  </Card>
+  
+  <Card title="Lightspeed" icon="bolt">
+    <ul className="list-none space-y-2 mt-2">
+      <li>✓ Minimal payload size</li>
+      <li>✓ Optimized for performance</li>
+      <li>✓ Lower latency</li>
+      <li>✓ Ideal for trading applications</li>
+      <li>❌ No verification metadata</li>
+    </ul>
+  </Card>
+</CardGroup>
+
+<Tip>
+Choose Starkex when data provenance and verification are required, and Lightspeed when raw performance is your primary concern.
+</Tip>

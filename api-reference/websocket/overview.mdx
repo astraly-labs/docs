@@ -1,44 +1,158 @@
 ---
-title: "Overview"
+title: "WebSocket API Overview"
 sidebarTitle: "Overview"
+description: "Learn how to establish and maintain real-time connections with Pragma's WebSocket API"
 ---
 
-## Base URL
+<Info>
+WebSockets provide a persistent connection between your application and Pragma's servers, allowing for real-time data streaming with minimal latency.
+</Info>
 
-<Tip>
-  We recommend you use the **Development** endpoint until you are confident about going to production.
-</Tip>
+## Connection Endpoints
 
-**Development**
-
-```bash
-wss://ws.devnet.pragma.build/node/v1
-```
-
-**Production**
-
-```bash
-wss://ws.production.pragma.build/node/v1
-```
+<Tabs>
+  <Tab title="Development">
+    <CodeGroup>
+    ```bash
+    wss://ws.devnet.pragma.build/node/v1
+    ```
+    </CodeGroup>
+    
+    <Tip>
+      We recommend using the **Development** endpoint while building and testing your application.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Production">
+    <CodeGroup>
+    ```bash
+    wss://ws.production.pragma.build/node/v1
+    ```
+    </CodeGroup>
+    
+    <Warning>
+      Only switch to the Production endpoint when your application is fully tested and ready for deployment.
+    </Warning>
+  </Tab>
+</Tabs>
 
 ## Authentication
 
-All websocket connections are public and opened for now.
+<Info>
+  All WebSocket connections are currently public and open without authentication.
+</Info>
 
 <Warning>
-  In the near future they will be protected by an api key similar to the REST api.
+  In the near future, WebSocket connections will require authentication using an API key similar to the REST API. We recommend designing your implementation with this upcoming change in mind.
 </Warning>
 
-## Connection Details
+## Connection Management
 
-#### Byte Rate Limiting
+<CardGroup cols={2}>
+  <Card title="Connection Lifecycle" icon="recycle">
+    Understanding how to properly establish, maintain, and close WebSocket connections is essential for reliable real-time data streaming.
+  </Card>
+  <Card title="Reconnection Strategy" icon="arrows-rotate">
+    Implement proper reconnection logic to handle network interruptions and server-initiated disconnects gracefully.
+  </Card>
+</CardGroup>
 
-- Limited to **256 KB per second** per IP address
-- Connections exceeding this limit are automatically closed
-- Rate limits are tracked and enforced per unique IP address
+### Connection Limits
 
-#### Inactivity Management
+<AccordionGroup>
+  <Accordion title="Byte Rate Limiting" icon="gauge-high">
+    <div className="space-y-4">
+      <div className="flex items-center">
+        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+          <span className="text-blue-600 font-semibold">256</span>
+        </div>
+        <div className="ml-4">
+          <h4 className="text-lg font-medium">KB per second limit</h4>
+          <p className="text-gray-600">Each IP address is limited to 256 KB per second of data transmission</p>
+        </div>
+      </div>
+      
+      <div className="border-l-4 border-yellow-400 bg-yellow-50">
+        Connections exceeding this limit are automatically closed without warning
+      </div>
+      
+      <div className="text-sm text-gray-600">
+        Rate limits are tracked and enforced per unique IP address. Consider this when deploying multiple applications or services from the same origin.
+      </div>
+    </div>
+  </Accordion>
+  
+  <Accordion title="Inactivity Timeouts" icon="clock">
+    <div className="space-y-4">
+      <div className="flex items-center">
+        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+          <span className="text-blue-600 font-semibold">60s</span>
+        </div>
+        <div className="ml-4">
+          <h4 className="text-lg font-medium">Inactivity timeout</h4>
+          <p className="text-gray-600">Connections automatically close after 60 seconds of inactivity</p>
+        </div>
+      </div>
+      
+      <div className="bg-green-50 rounded">
+        <h4 className="font-medium text-green-800">Recommended Practice</h4>
+        <p className="text-green-700">Send a ping message every <strong>30 seconds</strong> to keep the connection alive</p>
+      </div>
+      
+      <div className="text-sm text-gray-600">
+        This timeout prevents resource consumption from idle connections and ensures efficient server utilization.
+      </div>
+    </div>
+  </Accordion>
+</AccordionGroup>
 
-- Connections automatically close after **60 seconds** of inactivity
-- Prevents resource consumption from idle connections
-- You should send a ping message every **30 seconds** to keep the connection alive
+## Best Practices
+
+<Steps>
+  <Step title="Implement proper error handling">
+    Always include robust error handling and reconnection logic in your WebSocket implementation. Network disconnections and server-side issues can occur, and your application should gracefully recover from these scenarios.
+  </Step>
+  <Step title="Use ping/pong messages">
+    Send regular ping messages (every 30 seconds) to keep the connection alive and detect stale connections early.
+  </Step>
+  <Step title="Monitor connection health">
+    Track connection state and performance metrics in your application to ensure reliable data delivery and prompt detection of issues.
+  </Step>
+  <Step title="Implement backoff strategy">
+    When reconnecting after failures, use an exponential backoff strategy to avoid overwhelming the server during outages.
+  </Step>
+</Steps>
+
+## Common Issues & Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection Closed Unexpectedly" icon="triangle-exclamation">
+    **Possible causes:**
+    - Rate limit exceeded (256 KB/s)
+    - Inactivity timeout (60 seconds without messages)
+    - Server maintenance or restarts
+    
+    **Solution:**
+    Implement reconnection logic with exponential backoff. Ensure you're sending ping messages every 30 seconds to keep the connection alive.
+  </Accordion>
+  
+  <Accordion title="Message Format Errors" icon="bug">
+    **Possible causes:**
+    - Incorrectly formatted JSON messages
+    - Missing required fields
+    - Invalid subscription parameters
+    
+    **Solution:**
+    Validate all outgoing message formats against the API documentation. Log and inspect error responses from the server.
+  </Accordion>
+  
+  <Accordion title="High Latency" icon="clock-rotate-left">
+    **Possible causes:**
+    - Network congestion
+    - Geographic distance from server
+    - Client-side processing delays
+    
+    **Solution:**
+    Consider using a closer geographic endpoint if available. Optimize client-side message processing to reduce delays.
+  </Accordion>
+</AccordionGroup>
