@@ -1,32 +1,37 @@
-# Mintlify Starter Kit
+# Pragma Documentation
 
-Click on `Use this template` to copy the Mintlify starter kit. The starter kit contains examples including
+<p align="center">
+  <img src="https://github.com/astraly-labs/pragma-docs/raw/main/docs/static/img/pragma-og-img.svg" alt="Pragma Logo" width="200"/>
+</p>
 
-- Guide pages
-- Navigation
-- Customizations
-- API Reference pages
-- Use of popular components
+> Pragma is the decentralized, transparent and composable oracle network, leveraging state-of-the-art zero-knowledge cryptography.
 
-### Development
+## 🌟 Welcome to Pragma
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the documentation changes locally. To install, use the following command
+Pragma is revolutionizing the oracle landscape by providing a robust, decentralized solution for bringing offchain data onchain. We're leveraging state of the art zk proofs to ensure data integrity, transparency, and composability across various blockchain ecosystems.
 
-```
-npm i -g mintlify
-```
+## 📚 What's Inside
 
-Run the following command at the root of your documentation (where docs.json is)
+This comprehensive documentation covers:
 
-```
-mintlify dev
-```
+- 🧮 **Computational Feeds**: Learn about our advanced data processing capabilities.
+- 🎲 **Randomness**: Discover how Pragma generates secure, verifiable random numbers.
+- 🏛️ **Architecture**: Dive deep into Pragma's technical infrastructure.
+- 🔌 **Pragma API (StarkEx/Offchain)**: Integrate Pragma into your projects seamlessly.
+- 🚀 **Pragma X**: Coming soon to a blockchain near you!
 
-### Publishing Changes
+## 🚀 Getting Started
 
-Install our Github App to auto propagate changes from your repo to your deployment. Changes will be deployed to production automatically after pushing to the default branch. Find the link to install on your dashboard. 
+To begin your journey with Pragma:
 
-#### Troubleshooting
+1. 📖 Browse through our documentation sections
+2. 💻 Check out our [GitHub repository](https://github.com/astraly-labs)
+3. 🤝 Join our [community Discord](https://discord.com/invite/M9aRZtZHU7)
 
-- Mintlify dev isn't running - Run `mintlify install` it'll re-install dependencies.
-- Page loads as a 404 - Make sure you are running in a folder with `docs.json`
+## 💡 Need Help?
+
+- 📣 For announcements, follow us on [Twitter](https://x.com/PragmaOracle)
+- 🙋‍♀️ For questions, visit our [Blog](https://blog.pragma.build)
+- 🐛 Found a bug? Open an issue on our [GitHub](https://github.com/astraly-labs/pragma-docs/issues)
+
+Happy building with Pragma! 🎉
