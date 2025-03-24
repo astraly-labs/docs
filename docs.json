@@ -10,7 +10,7 @@
   "api": {
     "openapi": "https://raw.githubusercontent.com/astraly-labs/pragma-node/refs/heads/dev/openapi.json"
   },
-"favicon": "/favicon.svg",
+"favicon": "/favicon.ico",
   "navigation": {
     "tabs": [
       {
