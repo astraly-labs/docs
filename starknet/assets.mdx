@@ -13,13 +13,17 @@ Pragma supports specific pairs that are listed and traded by our data partners. 
   Please read the [risk section](./risks) and contact us before integrating.
 </Tip>
 
-## Asset Pairs
+## Market prices
 
-The following asset pairs are officially supported by Pragma. More are added every week, so just reach out on [Twitter](https://twitter.com/PragmaOracle) or [Discord](https://discord.com/invite/M9aRZtZHU7) if you have a specific one you need.
+The following asset pairs are officially supported by Pragma. More are added every week, so just reach out on [Twitter](https://twitter.com/PragmaOracle) or [Discord](https://discord.com/invite/M9aRZtZHU7) if you have a specific one you need. These are all market rates, computed based on the median price across the most liquid markets.
 
 <Info>
   The <code>pair_id</code> is calculated by utf-8 encoding the uppercased string (e.g. <code>str_to_felt("BTC/USD")</code>) and used to refer to specific feeds on-chain.
 </Info>
+
+<Warning>
+  We have a [conversion rate](https://docs.pragma.build/starknet/development#conversion-rate) feed available for most of the LSTs/LRTs. We strongly encourage you to use those, especially for xSTRK and sSTRK, given the low number of sources available on the market rate. You shouldn't go in prod with the market rate for these assets until we add more sources.
+</Warning>
 
 <Tabs>
   <Tab title="Spot">
