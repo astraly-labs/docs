@@ -56,11 +56,11 @@ This endpoint is very similar to our [StarkEx](./starkex) endpoint except it doe
     
     <CodeGroup>
     ```bash Development
-    wscat -c wss://ws.devnet.pragma.build/node/v1/price/subscribe
+    wscat -c wss://ws.devnet.pragma.build/node/v1/data/price/subscribe
     ```
     
     ```bash Production
-    wscat -c wss://ws.production.pragma.build/node/v1/price/subscribe
+    wscat -c wss://ws.production.pragma.build/node/v1/data/price/subscribe
     ```
     </CodeGroup>
   </Step>
@@ -156,7 +156,7 @@ All numeric values are returned as strings to preserve precision, especially for
     const WebSocket = require('ws');
     
     // Connect to Lightspeed endpoint
-    const ws = new WebSocket('wss://ws.devnet.pragma.build/node/v1/price/subscribe');
+    const ws = new WebSocket('wss://ws.devnet.pragma.build/node/v1/data/price/subscribe');
     
     // Subscribe to pairs on connection open
     ws.on('open', function open() {
@@ -241,7 +241,7 @@ All numeric values are returned as strings to preserve precision, especially for
     # Connect to Lightspeed endpoint
     if __name__ == "__main__":
         websocket.enableTrace(True)  # For debugging
-        ws = websocket.WebSocketApp("wss://ws.devnet.pragma.build/node/v1/price/subscribe",
+        ws = websocket.WebSocketApp("wss://ws.devnet.pragma.build/node/v1/data/price/subscribe",
                                    on_open=on_open,
                                    on_message=on_message,
                                    on_error=on_error,
