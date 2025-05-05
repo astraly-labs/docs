@@ -10,7 +10,7 @@
   "api": {
     "openapi": "https://raw.githubusercontent.com/astraly-labs/pragma-node/refs/heads/dev/openapi.json"
   },
-"favicon": "/favicon.png",
+  "favicon": "/favicon.png",
   "navigation": {
     "tabs": [
       {
@@ -75,7 +75,9 @@
             "pages": [
               "api-reference/offchain/aggregation-candlestick",
               "api-reference/offchain/data-pair",
-              "api-reference/offchain/multi-stream"
+              "api-reference/offchain/multi-stream",
+              "api-reference/offchain/funding-rates",
+              "api-reference/offchain/historical-funding-rates"
             ]
           },
           {
