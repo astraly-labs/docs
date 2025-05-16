@@ -73,12 +73,30 @@
           {
             "group": "Offchain",
             "pages": [
-              "api-reference/offchain/aggregation-candlestick",
-              "api-reference/offchain/data-pair",
-              "api-reference/offchain/multi-stream",
-              "api-reference/offchain/funding-rates",
-              "api-reference/offchain/historical-funding-rates",
-              "api-reference/offchain/funding-rates-instruments"
+              {
+                "group": "Prices",
+                "pages": [
+                  "api-reference/offchain/aggregation-candlestick",
+                  "api-reference/offchain/data-pair",
+                  "api-reference/offchain/multi-stream"
+                ]
+              },
+              {
+                "group": "Funding Rates",
+                "pages": [
+                  "api-reference/offchain/funding-rates",
+                  "api-reference/offchain/historical-funding-rates",
+                  "api-reference/offchain/funding-rates-instruments"
+                ]
+              },
+              {
+                "group": "Open Interest",
+                "pages": [
+                  "api-reference/offchain/open-interests",
+                  "api-reference/offchain/historical-open-interests",
+                  "api-reference/offchain/open-interests-instruments"
+                ]
+              }
             ]
           },
           {
