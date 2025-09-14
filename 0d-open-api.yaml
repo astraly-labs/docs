@@ -1,0 +1,908 @@
+openapi: 3.1.0
+info:
+  title: 0D Vaults API
+  version: 1.0.0
+  description: >
+    Everything the frontend needs to render the Vaults screen, fetch user-scoped
+    metrics, build deposit/withdraw flows, and subscribe to live updates.
+
+servers:
+  - url: https://0d.finance/api/v1
+  - url: https://api.0d.finance/v1
+
+paths:
+
+  ############################
+  # Vault registry & metadata
+  ############################
+
+  /vaults:
+    get:
+      summary: List vaults
+      tags: [Vaults]
+      operationId: listVaults
+      responses:
+        '200':
+          description: Vault list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VaultListItem'
+                required: [items]
+              examples:
+                default:
+                  value:
+                    items:
+                      - id: starknet-elp
+                        name: Starknet ELP Vault
+                        description: >
+                          Mandate: The community-owned Starknet ecosystem
+                          liquidity provider vault is a non-custodial fully
+                          delta-neutral vault.It provides liquidity through
+                          multiple market making strategies, into Starknet's main
+                          AMM Ekubo and Starknet's main perpetual exchange
+                          Extended. More information can be found here
+                        chain: starknet
+                        symbol: 0D-ELP
+                        tvl: "300000000"
+                        status: live
+        default:
+          $ref: '#/components/responses/Error'
+
+  /vaults/{vault_id}:
+    get:
+      summary: Vault Metadata
+      tags: [Vaults]
+      operationId: getVault
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: Vault Metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vault'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /vaults/{vault_id}/stats:
+    get:
+      summary: Vault statistics
+      tags: [Vaults]
+      operationId: getVaultStats
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: Vault statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaultStats'
+              examples:
+                default:
+                  value:
+                    tvl: "300000000"
+                    past_month_apr_pct: 13.48
+        default:
+          $ref: '#/components/responses/Error'
+
+  ################################
+  # Performance charts & KPIs
+  ################################
+
+  /vaults/{vault_id}/timeseries:
+    get:
+      summary: Vault-level timeseries
+      tags: [Performance]
+      operationId: getVaultTimeseries
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+        - $ref: '#/components/parameters/VaultMetric'
+        - $ref: '#/components/parameters/Timeframe'
+        - $ref: '#/components/parameters/Currency'
+      responses:
+        '200':
+          description: Timeseries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeseriesResponse'
+              examples:
+                tvl_all:
+                  value:
+                    metric: tvl
+                    timeframe: all
+                    points:
+                      - { t: '2025-07-01T00:00:00Z', v: '250000000' }
+                      - { t: '2025-08-01T00:00:00Z', v: '300000000' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /vaults/{vault_id}/kpis:
+    get:
+      summary: Vault performance KPIs
+      tags: [Performance]
+      operationId: getVaultKPIs
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+        - $ref: '#/components/parameters/Timeframe'
+      responses:
+        '200':
+          description: KPIs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VaultKPIs'
+              examples:
+                default:
+                  value:
+                    cumulative_pnl_usd: "25000000"
+                    max_drawdown_pct: 2.43
+                    sharpe: 3.19
+                    profit_share_bps: 2000
+        default:
+          $ref: '#/components/responses/Error'
+
+  ##############################################
+  # Liquidity policy, curve & withdrawal UX
+  ##############################################
+
+  /vaults/{vault_id}/liquidity:
+    get:
+      summary: Liquidity summary and capacities
+      tags: [Liquidity]
+      operationId: getVaultLiquidity
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: Liquidity snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiquiditySummary'
+              examples:
+                default:
+                  value:
+                    as_of: '2025-10-23T12:00:00Z'
+                    is_liquid: true
+                    withdraw_capacity_usd_24h: "3000000"
+                    deposit_capacity_usd_24h: "5000000"
+                    policy_markdown: >
+                      24h redeems available up to operational capacity; above
+                      that, scheduled windows apply. Instant path available with
+                      bounded slippage.
+        default:
+          $ref: '#/components/responses/Error'
+
+  /vaults/{vault_id}/liquidity/curve:
+    get:
+      summary: Slippage curve
+      tags: [Liquidity]
+      operationId: getVaultLiquidityCurve
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: Curve points
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiquidityCurve'
+              examples:
+                default:
+                  value:
+                    is_liquid: true
+                    points:
+                      - { amount_usd: "0",       slippage_bps: 0 }
+                      - { amount_usd: "100000",  slippage_bps: 4 }
+                      - { amount_usd: "250000",  slippage_bps: 9 }
+                      - { amount_usd: "500000",  slippage_bps: 18 }
+                      - { amount_usd: "1000000", slippage_bps: 32 }
+                      - { amount_usd: "2500000", slippage_bps: 49 }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /vaults/{vault_id}/liquidity/simulate:
+    post:
+      summary: Estimate instant slippage or scheduled withdrawal windows
+      tags: [Liquidity]
+      operationId: simulateVaultLiquidity
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: string
+                  description: Requested base-asset amount
+              required: [amount]
+            examples:
+              default:
+                value: { amount: "2000000" }
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiquiditySimulation'
+              examples:
+                default:
+                  value:
+                    amount: "2000000"
+                    instant: { supported: true, est_slippage_bps: 18, cap_remaining: "5000000" }
+                    scheduled:
+                      - { window: "24h", max_without_delay: "3000000", expected_nav_date: "2025-10-24T12:00:00Z" }
+                      - { window: "48h", expected_nav_date: "2025-10-25T12:00:00Z" }
+        default:
+          $ref: '#/components/responses/Error'
+
+  ############################
+  # APRs
+  ############################
+
+  /vaults/{vault_id}/apr/summary:
+    get:
+      summary: APR Summary
+      tags: [APR]
+      operationId: getAprSummary
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+        - $ref: '#/components/parameters/AprBasis'
+      responses:
+        '200':
+          description: APR summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AprSummary'
+              examples:
+                default:
+                  value: { apr_pct: 12.49, apr_basis: nominal }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /vaults/{vault_id}/apr/series:
+    get:
+      summary: Historical APR
+      tags: [APR]
+      operationId: getAprSeries
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+        - $ref: '#/components/parameters/Timeframe'
+      responses:
+        '200':
+          description: Historical APR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AprSeries'
+              examples:
+                default:
+                  value:
+                    timeframe: 7d
+                    points:
+                      - { t: '2025-08-06T00:00:00Z', apr_pct: 12.5 }
+                      - { t: '2025-08-07T00:00:00Z', apr_pct: 12.8 }
+                      - { t: '2025-08-08T00:00:00Z', apr_pct: 13.1 }
+        default:
+          $ref: '#/components/responses/Error'
+
+  ########################################
+  # Vault composition
+  ########################################
+
+  /vaults/{vault_id}/composition:
+    get:
+      summary: Current vault composition
+      tags: [Composition]
+      operationId: getComposition
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+        - in: query
+          name: group_by
+          description: Aggregate by platform or asset
+          schema: { type: string, enum: [platform, asset], default: platform }
+      responses:
+        '200':
+          description: Composition snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompositionSnapshot'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /vaults/{vault_id}/composition/series:
+    get:
+      summary: Historical composition
+      tags: [Composition]
+      operationId: getCompositionSeries
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+        - $ref: '#/components/parameters/Timeframe'
+        - in: query
+          name: group_by
+          description: Group by platform or asset
+          schema: { type: string, enum: [platform, asset], default: platform }
+      responses:
+        '200':
+          description: Historical composition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompositionSeries'
+              examples:
+                default:
+                  value:
+                    timeframe: 30d
+                    group_by: platform
+                    labels: ["Ekubo", "Extended", "Aave", "Other"]
+                    points:
+                      - { t: '2025-09-24T00:00:00Z', weights_pct: [45.0, 35.0, 15.0, 5.0] }
+                      - { t: '2025-09-25T00:00:00Z', weights_pct: [44.5, 35.5, 15.0, 5.0] }
+        default:
+          $ref: '#/components/responses/Error'
+
+  ###############################
+  # Caps
+  ###############################
+
+  /vaults/{vault_id}/caps:
+    get:
+      summary: Current values vs configured limits
+      tags: [Risk]
+      operationId: getCaps
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: Caps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Caps'
+        default:
+          $ref: '#/components/responses/Error'
+
+  #################################
+  # NAV reports & last deltas
+  #################################
+
+  /vaults/{vault_id}/nav/latest:
+    get:
+      summary: Last NAV report & deltas
+      tags: [NAV]
+      operationId: getNavLatest
+      parameters:
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: Latest NAV summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NavLatest'
+              examples:
+                default:
+                  value:
+                    date: '2025-10-23'
+                    aum: "100000"
+                    var_since_prev_pct: 0.1
+                    apr_since_prev_pct: 1.9
+                    report_url: 'https://cdn.0d.finance/nav/starknet-elp/2025-10-23.pdf'
+        default:
+          $ref: '#/components/responses/Error'
+
+  ########################################
+  # User scope
+  ########################################
+
+  /users/{address}:
+    get:
+      summary: User profile
+      tags: [User]
+      operationId: getUser
+      parameters:
+        - $ref: '#/components/parameters/UserAddress'
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/{address}/vaults/{vault_id}/summary:
+    get:
+      summary: User position summary
+      tags: [User]
+      operationId: getUserVaultSummary
+      parameters:
+        - $ref: '#/components/parameters/UserAddress'
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: User position summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserVaultSummary'
+              examples:
+                default:
+                  value:
+                    vault_id: starknet-elp
+                    as_of: '2025-10-23T12:00:00Z'
+                    position_value_usd: "10000"
+                    share_balance: "9850"
+                    share_price: "1.015"
+                    first_deposit_at: '2025-01-15T10:30:00Z'
+                    total_deposits: "9500"
+                    all_time_earned: "500"
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/{address}/vaults/{vault_id}/historical:
+    get:
+      summary: Historical User performance
+      tags: [User, Performance]
+      operationId: getUserVaultTimeseries
+      parameters:
+        - $ref: '#/components/parameters/UserAddress'
+        - $ref: '#/components/parameters/VaultId'
+        - $ref: '#/components/parameters/UserPerfMetric'
+        - $ref: '#/components/parameters/Timeframe'
+        - $ref: '#/components/parameters/Currency'
+      responses:
+        '200':
+          description: Historical User performance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeseriesResponse'
+              examples:
+                pnl_30d:
+                  value:
+                    metric: all_time_pnl
+                    timeframe: 30d
+                    points:
+                      - { t: '2025-09-24T00:00:00Z', v: '987000' }
+                      - { t: '2025-09-25T00:00:00Z', v: '990500' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/{address}/vaults/{vault_id}/kpis:
+    get:
+      summary: User performance KPIs
+      tags: [User, Performance]
+      operationId: getUserVaultKPIs
+      parameters:
+        - $ref: '#/components/parameters/UserAddress'
+        - $ref: '#/components/parameters/VaultId'
+      responses:
+        '200':
+          description: User KPIs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserKPIs'
+              examples:
+                default:
+                  value:
+                    as_of: '2025-10-23T12:00:00Z'
+                    all_time_pnl_usd: "1000000"
+                    unrealized_pnl_usd: "140000"
+                    realized_pnl_usd: "860000"
+                    max_drawdown_pct: 2.43
+                    sharpe: 3.19
+                    sortino: 3.19
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/{address}/vaults/{vault_id}/transactions:
+    get:
+      summary: User transaction history
+      tags: [User]
+      operationId: listUserTransactions
+      parameters:
+        - $ref: '#/components/parameters/UserAddress'
+        - $ref: '#/components/parameters/VaultId'
+        - in: query
+          name: type
+          schema: { type: string, enum: [deposit, withdraw, fee, rebalance] }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        '200':
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        default:
+          $ref: '#/components/responses/Error'
+
+components:
+
+  parameters:
+    VaultId:
+      name: vault_id
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+      description: Stable vault identifier
+    UserAddress:
+      name: address
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+      description: User wallet address
+    Timeframe:
+      name: timeframe
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [7d, 30d, 1y, all]
+        default: all
+    Currency:
+      name: currency
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [USD, USDC]
+        default: USD
+    VaultMetric:
+      name: metric
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: [tvl, pnl]
+      description: Vault-level metric to return
+    UserPerfMetric:
+      name: metric
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: [all_time_pnl, unrealized_pnl, realized_pnl]
+      description: User performance metric to return
+    AprBasis:
+      name: apr_basis
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [nominal, inflation_adjusted]
+        default: nominal
+
+  responses:
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            request_id: { type: string }
+          required: [code, message]
+      required: [error]
+
+    VaultListItem:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        chain: { type: string }
+        symbol: { type: string }
+        tvl: { type: string, description: 'May exceed 53-bit precision; return as string.' }
+        status: { type: string, enum: [live, paused, retired] }
+      required: [id, name, chain, symbol, tvl, status]
+
+    Vault:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        inception_date: { type: string }
+        chain: { type: string }
+        chain_id: { type: string, nullable: true }
+        symbol: { type: string }
+        base_asset: { type: string }
+        status: { type: string, enum: [live, paused, retired] }
+        tvl: { type: string }
+        share_price: { type: string }
+        mgmt_fee_bps: { type: integer }
+        perf_fee_bps: { type: integer }
+        strategy_brief: { type: string }
+        docs_url: { type: string }
+        contract:
+          type: object
+          properties:
+            address: { type: string }
+            abi_version: { type: string }
+        deposit_constraints:
+          type: object
+          properties:
+            min_deposit: { type: string }
+            max_deposit: { type: string, nullable: true }
+            paused: { type: boolean }
+        withdraw_constraints:
+          type: object
+          properties:
+            instant_liquidity: { type: boolean }
+            instant_slippage_max_bps: { type: integer }
+            redeem_24h_threshold_pct_of_aum: { type: number }
+            redeem_48h_above_threshold: { type: boolean }
+        icons:
+          type: object
+          properties:
+            light: { type: string }
+            dark: { type: string }
+      required:
+        - id
+        - name
+        - description
+        - chain
+        - symbol
+        - status
+        - tvl
+        - share_price
+        - perf_fee_bps
+
+    VaultStats:
+      type: object
+      properties:
+        tvl: { type: string }
+        past_month_apr_pct: { type: number }
+      required: [tvl, past_month_apr_pct]
+
+    TimeseriesPoint:
+      type: object
+      properties:
+        t: { type: string, format: date-time }
+        v: { type: string, description: 'Value as string; for TVL/PnL may exceed JS number range.' }
+      required: [t, v]
+
+    TimeseriesResponse:
+      type: object
+      properties:
+        metric: { type: string }
+        timeframe: { type: string }
+        points:
+          type: array
+          items: { $ref: '#/components/schemas/TimeseriesPoint' }
+      required: [metric, timeframe, points]
+
+    VaultKPIs:
+      type: object
+      properties:
+        cumulative_pnl_usd: { type: string }
+        max_drawdown_pct: { type: number }
+        sharpe: { type: number }
+        profit_share_bps: { type: integer }
+      required: [cumulative_pnl_usd, max_drawdown_pct, sharpe, profit_share_bps]
+
+    UserKPIs:
+      type: object
+      properties:
+        as_of: { type: string, format: date-time }
+        all_time_pnl_usd: { type: string }
+        unrealized_pnl_usd: { type: string }
+        realized_pnl_usd: { type: string }
+        max_drawdown_pct: { type: number }
+        sharpe: { type: number }
+        sortino: { type: number }
+      required: [as_of, all_time_pnl_usd, unrealized_pnl_usd, max_drawdown_pct]
+
+    LiquiditySummary:
+      type: object
+      properties:
+        as_of: { type: string, format: date-time }
+        is_liquid: { type: boolean }
+        withdraw_capacity_usd_24h: { type: string }
+        deposit_capacity_usd_24h: { type: string }
+        policy_markdown: { type: string }
+      required: [is_liquid, withdraw_capacity_usd_24h, deposit_capacity_usd_24h]
+
+    LiquidityCurve:
+      type: object
+      properties:
+        is_liquid: { type: boolean }
+        points:
+          type: array
+          items:
+            type: object
+            properties:
+              amount_usd: { type: string }
+              slippage_bps: { type: number }
+            required: [amount_usd, slippage_bps]
+      required: [is_liquid, points]
+
+    LiquiditySimulation:
+      type: object
+      properties:
+        amount: { type: string }
+        instant:
+          type: object
+          nullable: true
+          properties:
+            supported: { type: boolean }
+            est_slippage_bps: { type: number }
+            cap_remaining: { type: string }
+        scheduled:
+          type: array
+          items:
+            type: object
+            properties:
+              window: { type: string }
+              max_without_delay: { type: string, nullable: true }
+              expected_nav_date: { type: string, format: date-time }
+            required: [window, expected_nav_date]
+      required: [amount]
+
+    AprSummary:
+      type: object
+      properties:
+        apr_pct: { type: number }
+        apr_basis: { type: string, enum: [nominal, inflation_adjusted] }
+      required: [apr_pct, apr_basis]
+
+    AprSeriesPoint:
+      type: object
+      properties:
+        t: { type: string, format: date-time }
+        apr_pct: { type: number }
+      required: [t, apr_pct]
+
+    AprSeries:
+      type: object
+      properties:
+        timeframe: { type: string, enum: [7d, 30d, 1y, all] }
+        points:
+          type: array
+          items: { $ref: '#/components/schemas/AprSeriesPoint' }
+      required: [timeframe, points]
+
+    CompositionPosition:
+      type: object
+      properties:
+        platform: { type: string }
+        asset: { type: string }
+        symbol: { type: string }
+        pct: { type: number }
+        apy_est_pct: { type: number }
+        icon: { type: string }
+      required: [platform, asset, symbol, pct]
+
+    CompositionSnapshot:
+      type: object
+      properties:
+        as_of: { type: string, format: date-time }
+        positions:
+          type: array
+          items: { $ref: '#/components/schemas/CompositionPosition' }
+      required: [positions]
+
+    CompositionSeries:
+      type: object
+      properties:
+        timeframe: { type: string }
+        group_by: { type: string, enum: [platform, asset] }
+        labels:
+          type: array
+          items: { type: string }
+        points:
+          type: array
+          items:
+            type: object
+            properties:
+              t: { type: string, format: date-time }
+              weights_pct:
+                type: array
+                items: { type: number }
+            required: [t, weights_pct]
+      required: [timeframe, group_by, labels, points]
+
+    Caps:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              current: { type: number }
+              limit: { type: number }
+              unit: { type: string }
+            required: [name, current, limit, unit]
+      required: [items]
+
+    NavLatest:
+      type: object
+      properties:
+        date: { type: string }
+        aum: { type: string }
+        var_since_prev_pct: { type: number }
+        apr_since_prev_pct: { type: number }
+        report_url: { type: string }
+      required: [date, aum, var_since_prev_pct, apr_since_prev_pct, report_url]
+
+    User:
+      type: object
+      properties:
+        address: { type: string }
+        chain: { type: string }
+        display_currency: { type: string, enum: [USD, USDC] }
+      required: [address, chain, display_currency]
+
+    UserVaultSummary:
+      type: object
+      properties:
+        vault_id: { type: string }
+        as_of: { type: string, format: date-time }
+        position_value_usd: { type: string }
+        share_balance: { type: string }
+        share_price: { type: string }
+        first_deposit_at: { type: string, format: date-time }
+        total_deposits: { type: string }
+        all_time_earned: { type: string }
+      required:
+        - vault_id
+        - position_value_usd
+        - share_balance
+        - share_price
+
+    TransactionItem:
+      type: object
+      properties:
+        id: { type: string }
+        vault_id: { type: string }
+        type: { type: string, enum: [deposit, withdraw, fee, rebalance] }
+        status: { type: string, enum: [pending, confirmed, failed] }
+        amount: { type: string }
+        tx_hash: { type: string }
+        timestamp: { type: string, format: date-time }
+      required: [id, vault_id, type, status, amount, timestamp]
+
+    Transactions:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/TransactionItem' }
+        next_cursor: { type: string, nullable: true }
+      required: [items]

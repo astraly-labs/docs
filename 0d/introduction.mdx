@@ -1,0 +1,375 @@
+---
+title: "0D Finance API"
+description: "Complete API documentation for 0D Finance Vaults platform"
+---
+
+<Frame>
+  <img
+    height="100%"
+    width="100%"
+    src="/images/0d-finance-hero.png"
+    alt="0D Finance API"
+    title="0D Finance Vaults Platform"
+  />
+</Frame>
+
+Welcome to the 0D API documentation.
+We're building the best DeFi vaults, reach out if you have questions or want to discuss partnership opportunities.
+
+On Starknet 0D is leveraging the audited [Starknet Vault Kit](https://github.com/ForgeYields/starknet_vault_kit/) to ensure an efficient and secure vault infrastructure.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Vault Infrastructure" icon="vault">
+    Access and manage sophisticated vault strategies with real-time TVL tracking, composition analysis, and automated rebalancing.
+  </Card>
+  <Card title="Performance Analytics" icon="chart-line">
+    Track detailed performance metrics including Sharpe ratios, maximum drawdown, and historical PnL with institutional-grade accuracy.
+  </Card>
+  <Card title="Liquidity Management" icon="water">
+    Simulate withdrawals, calculate slippage, and optimize liquidity provisioning with advanced modeling capabilities.
+  </Card>
+  <Card title="Portfolio Tracking" icon="wallet">
+    Monitor user positions, transaction history, and earnings across multiple wallets with comprehensive portfolio analytics.
+  </Card>
+</CardGroup>
+
+## Base URL
+
+<Tabs>
+  <Tab title="Production">
+    <CodeGroup>
+      ```bash Primary
+      https://0d.finance/api/v1
+      ```
+      ```bash Alternative
+      https://api.0d.finance/v1
+      ```
+    </CodeGroup>
+    <Tip>
+      Use the primary endpoint for best performance and reliability in production environments.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Public API
+
+<Info>
+  All endpoints are publicly accessible without authentication. Simply make requests to our API endpoints to access vault data, performance metrics, and user portfolio information.
+</Info>
+
+### Open Access
+
+The 0D Finance API provides unrestricted access to:
+- **Vault Operations**: List vaults, get metadata, and statistics
+- **Performance Metrics**: Historical timeseries (TVL/PnL) and KPIs
+- **Liquidity Management**: Capacities, slippage curves, and withdrawal simulations
+- **APR Analytics**: Current summaries and historical series
+- **Composition Tracking**: Current allocations and historical changes
+- **Risk Monitoring**: Caps and NAV reports
+- **User Portfolios**: Track positions, performance, and transactions by wallet address
+
+## API Categories
+
+<AccordionGroup>
+  <Accordion icon="database" title="Vault Operations">
+    Core vault functionality and metadata access.
+
+    <CardGroup cols={2} className="mt-4">
+      <Card title="List Vaults">
+        Browse all available vaults with TVL, status, and basic info
+      </Card>
+      <Card title="Vault Metadata">
+        Detailed vault configuration, fees, constraints, and contract info
+      </Card>
+      <Card title="Vault Statistics">
+        Current TVL and past month APR performance metrics
+      </Card>
+      <Card title="Status Monitoring">
+        Track vault status (live, paused, retired) and operational state
+      </Card>
+    </CardGroup>
+  </Accordion>
+
+  <Accordion icon="chart-mixed" title="Performance Analytics">
+    Historical and real-time performance tracking.
+
+    <CardGroup cols={2} className="mt-4">
+      <Card title="Vault Timeseries">
+        TVL and PnL evolution with 7d, 30d, 1y, or all-time views
+      </Card>
+      <Card title="Vault KPIs">
+        Cumulative PnL, Sharpe ratio, max drawdown, profit share metrics
+      </Card>
+      <Card title="User Historical">
+        Track user PnL over time (all-time, unrealized, realized)
+      </Card>
+      <Card title="User KPIs">
+        Personal Sharpe, Sortino, drawdown, and PnL breakdowns
+      </Card>
+    </CardGroup>
+  </Accordion>
+
+  <Accordion icon="droplet" title="Liquidity Management">
+    Advanced liquidity analysis and simulation tools.
+
+    <CardGroup cols={2} className="mt-4">
+      <Card title="Liquidity Summary">
+        24h deposit/withdraw capacities and liquidity policies
+      </Card>
+      <Card title="Slippage Curves">
+        Visualize slippage (bps) for different withdrawal amounts (USD)
+      </Card>
+      <Card title="Withdrawal Simulation">
+        Estimate instant slippage or scheduled redemption windows
+      </Card>
+      <Card title="Liquidity Status">
+        Check if vault is liquid and operational capacity limits
+      </Card>
+    </CardGroup>
+  </Accordion>
+
+  <Accordion icon="percentage" title="APR, Composition & Risk">
+    Returns, allocations, and risk management.
+
+    <CardGroup cols={2} className="mt-4">
+      <Card title="APR Summary">
+        Current APR with nominal or inflation-adjusted basis
+      </Card>
+      <Card title="Historical APR">
+        APR time-series for 7d, 30d, 1y, or all-time periods
+      </Card>
+      <Card title="Vault Composition">
+        Current allocations by platform or asset with percentages
+      </Card>
+      <Card title="Historical Composition">
+        Track allocation changes over time with weighted percentages
+      </Card>
+      <Card title="Risk Caps">
+        Monitor current values vs configured limits
+      </Card>
+      <Card title="NAV Reports">
+        Latest NAV with AUM, variance, and PDF reports
+      </Card>
+    </CardGroup>
+  </Accordion>
+
+  <Accordion icon="user" title="User Management">
+    Track user portfolios and transactions by wallet address.
+
+    <CardGroup cols={2} className="mt-4">
+      <Card title="User Profile">
+        Get user info including chain and display currency preferences
+      </Card>
+      <Card title="Position Summary">
+        Current position value, shares, and earnings for a vault
+      </Card>
+      <Card title="Historical Performance">
+        User's historical PnL timeseries (all-time, unrealized, realized)
+      </Card>
+      <Card title="Performance KPIs">
+        User-specific Sharpe, Sortino, drawdown metrics
+      </Card>
+      <Card title="Transaction History">
+        List deposits, withdrawals, fees with filtering and pagination
+      </Card>
+      <Card title="Multi-Vault Support">
+        Track positions across multiple vaults per user
+      </Card>
+    </CardGroup>
+  </Accordion>
+</AccordionGroup>
+
+## Getting Started
+
+<Steps>
+  <Step title="Choose Your Environment">
+    Select between production endpoints based on your needs.
+  </Step>
+  <Step title="Make Your First Request">
+    Start fetching vault data immediately - no authentication required:
+
+    <CodeGroup>
+    ```javascript JavaScript
+    // Fetch vault list
+    const vaultsResponse = await fetch('https://0d.finance/api/v1/vaults');
+    const vaults = await vaultsResponse.json();
+
+    // Get specific vault details
+    const vaultId = 'starknet-elp';
+    const detailsResponse = await fetch(`https://0d.finance/api/v1/vaults/${vaultId}`);
+    const vaultDetails = await detailsResponse.json();
+
+    // Get vault statistics
+    const statsResponse = await fetch(`https://0d.finance/api/v1/vaults/${vaultId}/stats`);
+    const stats = await statsResponse.json();
+
+    console.log(`Vault: ${vaultDetails.name}`);
+    console.log(`TVL: $${stats.tvl}`);
+    console.log(`APR: ${stats.past_month_apr_pct}%`);
+    ```
+
+    ```python Python
+    import requests
+
+    # Fetch vault list
+    vaults_response = requests.get('https://0d.finance/api/v1/vaults')
+    vaults = vaults_response.json()
+
+    # Get specific vault details
+    vault_id = 'starknet-elp'
+    details_response = requests.get(f'https://0d.finance/api/v1/vaults/{vault_id}')
+    vault_details = details_response.json()
+
+    # Get vault statistics
+    stats_response = requests.get(f'https://0d.finance/api/v1/vaults/{vault_id}/stats')
+    stats = stats_response.json()
+
+    print(f"Vault: {vault_details['name']}")
+    print(f"TVL: ${stats['tvl']}")
+    print(f"APR: {stats['past_month_apr_pct']}%")
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Track User Portfolios">
+    Monitor user positions and performance by wallet address:
+
+    <CodeGroup>
+    ```javascript JavaScript
+    // Get user profile
+    const userAddress = '0x123...abc';
+    const vaultId = 'starknet-elp';
+
+    const userResponse = await fetch(
+      `https://0d.finance/api/v1/users/${userAddress}`
+    );
+    const user = await userResponse.json();
+
+    // Get user position summary
+    const summaryResponse = await fetch(
+      `https://0d.finance/api/v1/users/${userAddress}/vaults/${vaultId}/summary`
+    );
+    const summary = await summaryResponse.json();
+
+    // Get user performance KPIs
+    const kpisResponse = await fetch(
+      `https://0d.finance/api/v1/users/${userAddress}/vaults/${vaultId}/kpis`
+    );
+    const kpis = await kpisResponse.json();
+
+    // Get transaction history
+    const txResponse = await fetch(
+      `https://0d.finance/api/v1/users/${userAddress}/vaults/${vaultId}/transactions?limit=10`
+    );
+    const transactions = await txResponse.json();
+
+    console.log(`Position Value: $${summary.position_value_usd}`);
+    console.log(`Total Deposits: $${summary.total_deposits}`);
+    console.log(`All-time Earned: $${summary.all_time_earned}`);
+    console.log(`All-time PnL: $${kpis.all_time_pnl_usd}`);
+    console.log(`Sharpe Ratio: ${kpis.sharpe}`);
+    ```
+
+    ```python Python
+    # Get user profile
+    user_address = '0x123...abc'
+    vault_id = 'starknet-elp'
+
+    user_response = requests.get(
+        f'https://0d.finance/api/v1/users/{user_address}'
+    )
+    user = user_response.json()
+
+    # Get user position summary
+    summary_response = requests.get(
+        f'https://0d.finance/api/v1/users/{user_address}/vaults/{vault_id}/summary'
+    )
+    summary = summary_response.json()
+
+    # Get user performance KPIs
+    kpis_response = requests.get(
+        f'https://0d.finance/api/v1/users/{user_address}/vaults/{vault_id}/kpis'
+    )
+    kpis = kpis_response.json()
+
+    # Get transaction history
+    tx_response = requests.get(
+        f'https://0d.finance/api/v1/users/{user_address}/vaults/{vault_id}/transactions',
+        params={'limit': 10}
+    )
+    transactions = tx_response.json()
+
+    print(f"Position Value: ${summary['position_value_usd']}")
+    print(f"Total Deposits: ${summary['total_deposits']}")
+    print(f"All-time Earned: ${summary['all_time_earned']}")
+    print(f"All-time PnL: ${kpis['all_time_pnl_usd']}")
+    print(f"Sharpe Ratio: {kpis['sharpe']}")
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Explore Advanced Features">
+    Leverage our comprehensive endpoints for sophisticated DeFi applications.
+  </Step>
+</Steps>
+
+## Response Format
+
+<Note>
+  All API responses follow a consistent JSON structure for predictable integration.
+</Note>
+
+### Success Response
+```json
+{
+  "data": {
+    // Requested data
+  },
+  "meta": {
+    "timestamp": "2025-01-14T12:00:00Z",
+    "version": "1.0.0"
+  }
+}
+```
+
+### Error Response
+```json
+{
+  "error": {
+    "code": "VAULT_NOT_FOUND",
+    "message": "The requested vault does not exist",
+    "request_id": "req_abc123"
+  }
+}
+```
+
+<Warning>
+  Large numerical values exceeding JavaScript's safe integer range are returned as strings to preserve precision.
+</Warning>
+
+## Rate Limits
+
+<Info>
+  Rate limits are applied per IP address to ensure fair usage and system stability.
+</Info>
+
+| Endpoint Type | Rate Limit | Window |
+|--------------|------------|---------|
+| Public endpoints | 100 requests | 1 minute |
+
+## Support & Resources
+
+<CardGroup cols={2}>
+  <Card title="Discord Community" icon="discord" href="https://discord.gg/0dfinance">
+    Join our developer community for support and discussions
+  </Card>
+  <Card title="GitHub Examples" icon="github" href="https://github.com/0d-finance/examples">
+    Explore integration examples and starter templates
+  </Card>
+  <Card title="Status Page" icon="signal" href="https://status.0d.finance">
+    Monitor API availability and performance metrics
+  </Card>
+  <Card title="Contact Support" icon="envelope" href="mailto:api@0d.finance">
+    Reach out for technical assistance and partnership inquiries
+  </Card>
+</CardGroup>

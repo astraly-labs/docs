@@ -18,9 +18,7 @@
         "groups": [
           {
             "group": "Welcome",
-            "pages": [
-              "introduction"
-            ]
+            "pages": ["introduction"]
           }
         ]
       },
@@ -66,9 +64,7 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": [
-              "api-reference/introduction"
-            ]
+            "pages": ["api-reference/introduction"]
           },
           {
             "group": "Offchain",
@@ -116,6 +112,16 @@
               "api-reference/websocket/lightspeed",
               "api-reference/websocket/candlestick"
             ]
+          }
+        ]
+      },
+      {
+        "tab": "0D Finance",
+        "openapi": "/0d-open-api.yaml",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["0d/introduction"]
           }
         ]
       }
