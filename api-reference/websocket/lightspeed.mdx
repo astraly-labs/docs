@@ -123,9 +123,14 @@ If you close your WebSocket connection, all your subscriptions will be automatic
 <CodeGroup>
 ```json Example Price Update
 {
-  "pair_id": "0x12345",
-  "price": "10000000000000001",
-  "num_sources_aggregated": "8"
+  "oracle_prices": [
+    {
+      "num_sources_aggregated": 12,
+      "pair_id": "BTC/USD",
+      "price": "114876664243612000000000"
+    }
+  ],
+  "timestamp": 1757944509818
 }
 ```
 </CodeGroup>
@@ -133,14 +138,20 @@ If you close your WebSocket connection, all your subscriptions will be automatic
 ### Field Reference
 
 <Properties>
-  <Property name="pair_id" type="string">
-    Unique identifier for the asset encoded using the pair name.
+  <Property name="oracle_prices" type="array">
+    Array containing price data for subscribed asset pairs.
   </Property>
-  <Property name="price" type="string">
+  <Property name="oracle_prices[].pair_id" type="string">
+    The asset pair identifier (e.g., "BTC/USD").
+  </Property>
+  <Property name="oracle_prices[].price" type="string">
     The median price of the asset represented as a string to preserve precision.
   </Property>
-  <Property name="num_sources_aggregated" type="string">
+  <Property name="oracle_prices[].num_sources_aggregated" type="number">
     The number of sources that were aggregated for computing the median price.
+  </Property>
+  <Property name="timestamp" type="number">
+    Unix timestamp in milliseconds when the price update was generated.
   </Property>
 </Properties>
 
@@ -182,10 +193,15 @@ All numeric values are returned as strings to preserve precision, especially for
       }
       
       // Handle price updates
-      console.log(`Price update for ${message.pair_id}:`, {
-        price: message.price,
-        sources: message.num_sources_aggregated
-      });
+      if (message.oracle_prices) {
+        message.oracle_prices.forEach(price => {
+          console.log(`Price update for ${price.pair_id}:`, {
+            price: price.price,
+            sources: price.num_sources_aggregated,
+            timestamp: message.timestamp
+          });
+        });
+      }
       
       // Process price data as needed
       // ...
@@ -216,7 +232,9 @@ All numeric values are returned as strings to preserve precision, especially for
             return
             
         # Handle price updates
-        print(f"Price update for {data['pair_id']}: {data['price']} (from {data['num_sources_aggregated']} sources)")
+        if 'oracle_prices' in data:
+            for price in data['oracle_prices']:
+                print(f"Price update for {price['pair_id']}: {price['price']} (from {price['num_sources_aggregated']} sources, timestamp: {data['timestamp']})")
         
         # Process price data as needed
         # ...
