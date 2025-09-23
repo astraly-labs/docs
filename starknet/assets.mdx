@@ -45,6 +45,7 @@ The following asset pairs are officially supported by Pragma. More are added eve
     | KSTRK/USD  | 1389510320214278230852   | 8        | ✅      | H    |
     | SSTRK/USD  | 1537084272803954643780   | 8        | ✅      | H    |
     | BROTHER/USDPLUS  | 344361035359747530676741291142567251   | 18        | ✅      | H    |
+    | BROTHER/USDPLUS  | 344361035359747530676741291142567251   | 18        | ✅      | H    |
   </Tab>
   <Tab title="Future">
     | Ticker   | Pair Id             | Decimals | Mainnet | Risk |
@@ -127,6 +128,40 @@ fn get_asset_price_median(oracle_address: ContractAddress, asset : DataType) -> 
 }
 ```
 </CodeGroup>
+
+## Conversion Rates
+
+<Card title="LST/LRT Conversion Rates" icon="exchange">
+  These specialized feeds automatically calculate the conversion rate for liquid staking and liquid restaking tokens.
+</Card>
+
+**Supported feeds:**
+
+| Pair     | Pair Id             | Decimals |
+| -------- | ------------------- | -------- |
+| CONVERSION_XSTRK/USD  | 384270964630611589151504336040175440891848512324   | 8        |
+| CONVERSION_SSTRK/USD  | 384270964630611589151504335947941720523300754244   | 8        |
+| CONVERSION_XSBTC/USD  | 384270964630611589151504336040170376506931237700   | 8        |
+| CONVERSION_XTBTC/USD  | 384270964630611589151504336040242434100969165636   | 8        |
+| CONVERSION_XLBTC/USD  | 384270964630611589151504336039665973348665742148   | 8        |
+| CONVERSION_XWBTC/USD  | 384270964630611589151504336040458606883082949444   | 8        |
+
+<Info>
+  For implementation details and code examples, see the [Conversion Rate section](./development#conversion-rate) in the development documentation.
+</Info>
+
+## Exchange Rates
+
+<Warning>
+  The current exchange rate implementation is a v1 permissioned system without L1->L2 messaging. We're actively developing a permissionless version that will leverage L1->L2 messaging, though this will require additional time for completion and audit.
+</Warning>
+
+| Ticker     | Pair Id             | Decimals | Mainnet | Risk |
+| ---------- | ------------------- | -------- | ------- | ---- |
+| MRE7YIELD  | 6126029961662454190135905178436 | 8        | ✅      | H    |
+| MRE7BTC    | 93475798969100511401562948 | 8        | ✅      | H    |
+| LBTC/USD   | 5495047142879089476 | 8        | ✅      | H    |
+| uniBTC/USD | 402845275956029953495876 | 8        | ✅      | H    |
 
 ## Need More Assets?
 

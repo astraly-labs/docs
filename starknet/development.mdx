@@ -147,16 +147,9 @@ let price = get_asset_conversion_rate(oracle_address, DataType::SpotEntry((KEY))
 
 Alternatively, we implemented a specialized conversion rate feed that automatically calculates the conversion rate for specific feeds. Calling these feeds follows a process similar to retrieving spot BTC/USD prices.
 
-**Supported feeds:**
-
-| Pair     | Pair Id             | Decimals | 
-| -------- | ------------------- | -------- | 
-| CONVERSION_XSTRK/USD  | 384270964630611589151504336040175440891848512324   | 8        |
-| CONVERSION_SSTRK/USD  | 384270964630611589151504335947941720523300754244   | 8        | 
-| CONVERSION_XSBTC/USD  | 384270964630611589151504336040170376506931237700   | 8        | 
-| CONVERSION_XTBTC/USD  | 384270964630611589151504336040242434100969165636   | 8        | 
-| CONVERSION_XLBTC/USD  | 384270964630611589151504336039665973348665742148   | 8        | 
-| CONVERSION_XWBTC/USD  | 384270964630611589151504336040458606883082949444   | 8        | 
+<Info>
+  For the list of supported conversion rate feeds, see the [Conversion Rates section](./assets#conversion-rates) in the assets documentation.
+</Info> 
 
 <CodeGroup>
 ```rust get_asset_conversion_rate.cairo
