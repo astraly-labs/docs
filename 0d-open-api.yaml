@@ -652,7 +652,6 @@ components:
           type: object
           properties:
             address: { type: string }
-            abi_version: { type: string }
         deposit_constraints:
           type: object
           properties:
