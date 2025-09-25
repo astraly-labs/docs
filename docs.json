@@ -117,11 +117,64 @@
       },
       {
         "tab": "0D Finance",
-        "openapi": "/0d-open-api.yaml",
+        "openapi": "https://raw.githubusercontent.com/astraly-labs/0d-master-api/refs/heads/main/openapi.json?token=GHSAT0AAAAAADKFABMDA4XVRE44YIZ5EZZG2GVKQBQ",
         "groups": [
           {
             "group": "Overview",
             "pages": ["0d/introduction"]
+          },
+          {
+            "group": "Vaults",
+            "pages": [
+              "api-reference/0d/list-vaults",
+              "api-reference/0d/vault-metadata",
+              "api-reference/0d/vault-statistics",
+              "api-reference/0d/vault-info"
+            ]
+          },
+          {
+            "group": "Performance",
+            "pages": [
+              "api-reference/0d/vault-timeseries",
+              "api-reference/0d/vault-kpis"
+            ]
+          },
+          {
+            "group": "Liquidity",
+            "pages": [
+              "api-reference/0d/liquidity-summary",
+              "api-reference/0d/slippage-curve",
+              "api-reference/0d/simulate-liquidity"
+            ]
+          },
+          {
+            "group": "APR",
+            "pages": [
+              "api-reference/0d/apr-summary",
+              "api-reference/0d/historical-apr"
+            ]
+          },
+          {
+            "group": "Composition",
+            "pages": [
+              "api-reference/0d/vault-composition",
+              "api-reference/0d/historical-composition"
+            ]
+          },  
+          {
+            "group": "NAV",
+            "pages": ["api-reference/0d/nav-latest"]
+          },
+          {
+            "group": "User",
+            "pages": [
+              "api-reference/0d/user-profile",
+              "api-reference/0d/user-pending-redeems",
+              "api-reference/0d/user-position-summary",
+              "api-reference/0d/user-historical-performance",
+              "api-reference/0d/user-kpis",
+              "api-reference/0d/user-transaction-history"
+            ]
           }
         ]
       }
