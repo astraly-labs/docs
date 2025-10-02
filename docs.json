@@ -7,9 +7,6 @@
     "light": "#07C983",
     "dark": "#15803D"
   },
-  "api": {
-    "openapi": "https://raw.githubusercontent.com/astraly-labs/pragma-node/refs/heads/dev/openapi.json"
-  },
   "favicon": "/favicon.png",
   "navigation": {
     "tabs": [
@@ -117,7 +114,6 @@
       },
       {
         "tab": "0D Finance",
-        "openapi": "https://raw.githubusercontent.com/astraly-labs/0d-master-api/refs/heads/main/openapi.json",
         "groups": [
           {
             "group": "Overview",

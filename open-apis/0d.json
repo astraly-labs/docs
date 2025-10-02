@@ -1,0 +1,1946 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "zerod_api",
+    "description": "0D Master API for vaults",
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    },
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.0d.finance/{version}",
+      "variables": {
+        "version": {
+          "default": "v1",
+          "enum": ["v1"]
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/users/{address}": {
+      "get": {
+        "tags": ["User"],
+        "operationId": "get_user_profile",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "User wallet address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users/{address}/redeems": {
+      "get": {
+        "tags": ["User"],
+        "operationId": "get_user_pending_redeems",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "User wallet address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vault_id",
+            "in": "query",
+            "description": "Filter by vault ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset_type",
+            "in": "query",
+            "description": "Filter by asset type",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending redeems for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingRedeemsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users/{address}/vaults/{vault_id}/historical": {
+      "get": {
+        "tags": ["User"],
+        "operationId": "get_historical_user_performance",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "User wallet address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "description": "User performance metric to return",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PerformanceMetric"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Time period for data",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Display currency",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Currency"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical User performance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoricalUserPerformance"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "User or vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Indexer not synced or experiencing issues"
+          }
+        }
+      }
+    },
+    "/users/{address}/vaults/{vault_id}/kpis": {
+      "get": {
+        "tags": ["User"],
+        "operationId": "get_user_kpis",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "User wallet address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User performance KPIs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserKpi"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User KPIs not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Indexer not synced or experiencing issues"
+          }
+        }
+      }
+    },
+    "/users/{address}/vaults/{vault_id}/summary": {
+      "get": {
+        "tags": ["User"],
+        "operationId": "get_user_position_summary",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "User wallet address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User position summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPositionSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User position not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Indexer not synced or experiencing issues"
+          }
+        }
+      }
+    },
+    "/users/{address}/vaults/{vault_id}/transactions": {
+      "get": {
+        "tags": ["User"],
+        "operationId": "get_user_transaction_history",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "description": "User wallet address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Transaction type filter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of transactions to return (1-200, default: 50)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Pagination cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User transaction history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTransactionHistory"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User or vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Indexer not synced or experiencing issues"
+          }
+        }
+      }
+    },
+    "/vaults": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "list_vaults",
+        "responses": {
+          "200": {
+            "description": "Vault list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VaultListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vault metadata with live values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vault"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/apr/series": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_apr_series",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Time period for APR series",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            },
+            "example": "7d"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical APR data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AprSeriesDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/apr/summary": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_apr_summary",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apr_basis",
+            "in": "query",
+            "description": "APR calculation basis",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AprBasis"
+            },
+            "example": "nominal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APR summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AprSummaryDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/caps": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_caps",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current values vs configured limits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapsDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/composition": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_composition",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "description": "Aggregate by platform or asset",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/GroupBy"
+            },
+            "example": "platform"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current vault composition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompositionDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/composition/series": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_composition_series",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Time period for composition series",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            },
+            "example": "30d"
+          },
+          {
+            "name": "group_by",
+            "in": "query",
+            "description": "Group by platform or asset",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "platform"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical composition data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompositionSeriesDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/info": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_info",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vault information including share price and AUM",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VaultInfoDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/kpis": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_kpis",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Time period for KPI calculation",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            },
+            "example": "all"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vault performance KPIs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KpisDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/liquidity": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_liquidity",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vault liquidity summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiquidityDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/liquidity/curve": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_slippage_curve",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vault slippage curve",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlippageCurveDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/liquidity/simulate": {
+      "post": {
+        "tags": ["Vaults"],
+        "operationId": "simulate_vault_liquidity",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiquiditySimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Liquidity simulation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiquiditySimulateResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/nav/latest": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_nav_latest",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest NAV report & deltas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NavLatestDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/stats": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_stats",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vault statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStatsDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/vaults/{vault_id}/timeseries": {
+      "get": {
+        "tags": ["Vaults"],
+        "operationId": "get_vault_timeseries",
+        "parameters": [
+          {
+            "name": "vault_id",
+            "in": "path",
+            "description": "Vault identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "description": "Vault-level metric to return",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Metric"
+            },
+            "example": "tvl"
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "description": "Time period",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Timeframe"
+            },
+            "example": "7d"
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "description": "Currency for values",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Currency"
+            },
+            "example": "USD"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vault timeseries data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeseriesResponseDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "404": {
+            "description": "Vault not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AprBasis": {
+        "type": "string",
+        "description": "APR basis enum",
+        "enum": ["nominal", "inflation_adjusted"]
+      },
+      "AprPoint": {
+        "type": "object",
+        "description": "APR data point for timeseries",
+        "required": ["t", "apr_pct"],
+        "properties": {
+          "apr_pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "t": {
+            "type": "string"
+          }
+        }
+      },
+      "AprSeriesDTO": {
+        "type": "object",
+        "required": ["timeframe", "points"],
+        "properties": {
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AprPoint"
+            }
+          },
+          "timeframe": {
+            "$ref": "#/components/schemas/Timeframe"
+          }
+        }
+      },
+      "AprSeriesQuery": {
+        "type": "object",
+        "description": "Query parameters for APR series endpoint",
+        "properties": {
+          "timeframe": {
+            "$ref": "#/components/schemas/Timeframe"
+          }
+        }
+      },
+      "AprSummaryDTO": {
+        "type": "object",
+        "required": ["apr_pct", "apr_basis"],
+        "properties": {
+          "apr_basis": {
+            "$ref": "#/components/schemas/AprBasis"
+          },
+          "apr_pct": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "AprSummaryQuery": {
+        "type": "object",
+        "description": "Query parameters for APR summary endpoint",
+        "properties": {
+          "apr_basis": {
+            "$ref": "#/components/schemas/AprBasis"
+          }
+        }
+      },
+      "CapItemDTO": {
+        "type": "object",
+        "required": ["name", "current", "limit", "unit"],
+        "properties": {
+          "current": {
+            "type": "number",
+            "format": "double"
+          },
+          "limit": {
+            "type": "number",
+            "format": "double"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "CapsDTO": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CapItemDTO"
+            }
+          }
+        }
+      },
+      "CompositionDTO": {
+        "type": "object",
+        "required": ["as_of", "positions"],
+        "properties": {
+          "as_of": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompositionPosition"
+            }
+          }
+        }
+      },
+      "CompositionPosition": {
+        "type": "object",
+        "description": "Composition position data",
+        "required": ["platform", "asset", "symbol", "pct", "apy_est_pct"],
+        "properties": {
+          "apy_est_pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "asset": {
+            "type": "string"
+          },
+          "icon": {
+            "type": ["string", "null"]
+          },
+          "pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        }
+      },
+      "CompositionQuery": {
+        "type": "object",
+        "description": "Query parameters for composition endpoint",
+        "properties": {
+          "group_by": {
+            "$ref": "#/components/schemas/GroupBy"
+          }
+        }
+      },
+      "CompositionSeriesDTO": {
+        "type": "object",
+        "required": ["timeframe", "group_by", "labels", "points"],
+        "properties": {
+          "group_by": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompositionSeriesPointDTO"
+            }
+          },
+          "timeframe": {
+            "type": "string"
+          }
+        }
+      },
+      "CompositionSeriesPointDTO": {
+        "type": "object",
+        "required": ["t", "weights_pct"],
+        "properties": {
+          "t": {
+            "type": "string"
+          },
+          "weights_pct": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        }
+      },
+      "CompositionSeriesQuery": {
+        "type": "object",
+        "description": "Query parameters for composition series endpoint",
+        "properties": {
+          "group_by": {
+            "$ref": "#/components/schemas/GroupBy"
+          },
+          "timeframe": {
+            "$ref": "#/components/schemas/Timeframe"
+          }
+        }
+      },
+      "Contract": {
+        "type": "object",
+        "required": ["address"],
+        "properties": {
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+      "Currency": {
+        "type": "string",
+        "enum": ["usd", "usdc"]
+      },
+      "DepositConstraints": {
+        "type": "object",
+        "properties": {
+          "max_deposit": {
+            "type": ["string", "null"]
+          },
+          "min_deposit": {
+            "type": ["string", "null"]
+          },
+          "paused": {
+            "type": ["boolean", "null"]
+          }
+        }
+      },
+      "GetStatsDTO": {
+        "type": "object",
+        "required": ["tvl", "past_month_apr_pct"],
+        "properties": {
+          "past_month_apr_pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "tvl": {
+            "type": "string"
+          }
+        }
+      },
+      "GroupBy": {
+        "type": "string",
+        "description": "Group by enum for composition endpoints",
+        "enum": ["platform", "asset"]
+      },
+      "HistoricalDataPoint": {
+        "type": "object",
+        "required": ["t", "v"],
+        "properties": {
+          "t": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "v": {
+            "type": "string"
+          }
+        }
+      },
+      "HistoricalUserPerformance": {
+        "type": "object",
+        "required": ["metric", "timeframe", "points"],
+        "properties": {
+          "metric": {
+            "$ref": "#/components/schemas/PerformanceMetric"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalDataPoint"
+            }
+          },
+          "timeframe": {
+            "$ref": "#/components/schemas/Timeframe"
+          }
+        }
+      },
+      "Icons": {
+        "type": "object",
+        "properties": {
+          "dark": {
+            "type": ["string", "null"]
+          },
+          "light": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "InstantLiquidityDTO": {
+        "type": "object",
+        "required": ["supported", "est_slippage_bps", "cap_remaining"],
+        "properties": {
+          "cap_remaining": {
+            "type": "string"
+          },
+          "est_slippage_bps": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "supported": {
+            "type": "boolean"
+          }
+        }
+      },
+      "KpisDTO": {
+        "type": "object",
+        "required": [
+          "cumulative_pnl_usd",
+          "max_drawdown_pct",
+          "sharpe",
+          "profit_share_bps"
+        ],
+        "properties": {
+          "cumulative_pnl_usd": {
+            "type": "string"
+          },
+          "max_drawdown_pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "profit_share_bps": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "sharpe": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "LiquidityDTO": {
+        "type": "object",
+        "required": [
+          "is_liquid",
+          "withdraw_capacity_usd_24h",
+          "deposit_capacity_usd_24h"
+        ],
+        "properties": {
+          "as_of": {
+            "type": ["string", "null"]
+          },
+          "deposit_capacity_usd_24h": {
+            "type": "string"
+          },
+          "is_liquid": {
+            "type": "boolean"
+          },
+          "policy_markdown": {
+            "type": ["string", "null"]
+          },
+          "withdraw_capacity_usd_24h": {
+            "type": "string"
+          }
+        }
+      },
+      "LiquiditySimulateRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": {
+            "type": "string"
+          }
+        }
+      },
+      "LiquiditySimulateResponseDTO": {
+        "type": "object",
+        "required": ["amount", "scheduled"],
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "instant": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InstantLiquidityDTO"
+              }
+            ]
+          },
+          "scheduled": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduledWindowDTO"
+            }
+          }
+        }
+      },
+      "Metric": {
+        "type": "string",
+        "enum": ["tvl", "pnl"]
+      },
+      "NavLatestDTO": {
+        "type": "object",
+        "required": [
+          "date",
+          "aum",
+          "var_since_prev_pct",
+          "apr_since_prev_pct",
+          "report_url"
+        ],
+        "properties": {
+          "apr_since_prev_pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "aum": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "report_url": {
+            "type": "string"
+          },
+          "var_since_prev_pct": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "PendingRedeem": {
+        "type": "object",
+        "required": [
+          "vault_id",
+          "amount",
+          "transaction_type",
+          "tx_hash",
+          "submitted_at"
+        ],
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transaction_type": {
+            "$ref": "#/components/schemas/TransactionType"
+          },
+          "tx_hash": {
+            "type": "string"
+          },
+          "vault_id": {
+            "type": "string"
+          }
+        }
+      },
+      "PendingRedeemsResponse": {
+        "type": "object",
+        "required": ["address", "as_of", "pending_redeems", "total_pending"],
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "average_redeem_delay": {
+            "type": ["integer", "null"],
+            "format": "int64"
+          },
+          "pending_redeems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingRedeem"
+            }
+          },
+          "total_pending": {
+            "type": "string"
+          }
+        }
+      },
+      "PerformanceMetric": {
+        "type": "string",
+        "enum": ["all_time_pnl", "unrealized_pnl", "realized_pnl"]
+      },
+      "ResponseStatus": {
+        "type": "string",
+        "enum": ["ok", "error"]
+      },
+      "ScheduledWindowDTO": {
+        "type": "object",
+        "required": ["window", "expected_nav_date"],
+        "properties": {
+          "expected_nav_date": {
+            "type": "string"
+          },
+          "max_without_delay": {
+            "type": ["string", "null"]
+          },
+          "window": {
+            "type": "string"
+          }
+        }
+      },
+      "SlippageCurveDTO": {
+        "type": "object",
+        "required": ["is_liquid", "points"],
+        "properties": {
+          "is_liquid": {
+            "type": "boolean"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlippagePointDTO"
+            }
+          }
+        }
+      },
+      "SlippagePointDTO": {
+        "type": "object",
+        "required": ["amount_usd", "slippage_bps"],
+        "properties": {
+          "amount_usd": {
+            "type": "string"
+          },
+          "slippage_bps": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "Timeframe": {
+        "type": "string",
+        "enum": ["7d", "30d", "1y", "all"]
+      },
+      "TimeframeQuery": {
+        "type": "object",
+        "description": "Common query parameters for endpoints that accept timeframe",
+        "properties": {
+          "timeframe": {
+            "$ref": "#/components/schemas/Timeframe"
+          }
+        }
+      },
+      "TimeseriesCurrency": {
+        "type": "string",
+        "enum": ["USD", "USDC"]
+      },
+      "TimeseriesMetric": {
+        "type": "string",
+        "enum": ["tvl", "pnl"]
+      },
+      "TimeseriesPoint": {
+        "type": "object",
+        "description": "Common timeseries data point used across vault and user endpoints",
+        "required": ["t", "v"],
+        "properties": {
+          "t": {
+            "type": "string"
+          },
+          "v": {
+            "type": "string"
+          }
+        }
+      },
+      "TimeseriesQuery": {
+        "type": "object",
+        "description": "Query parameters for timeseries endpoint",
+        "required": ["metric"],
+        "properties": {
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/Metric"
+          },
+          "timeframe": {
+            "$ref": "#/components/schemas/Timeframe"
+          }
+        }
+      },
+      "TimeseriesResponseDTO": {
+        "type": "object",
+        "required": ["metric", "timeframe", "points"],
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeseriesPoint"
+            }
+          },
+          "timeframe": {
+            "type": "string"
+          }
+        }
+      },
+      "TransactionStatus": {
+        "type": "string",
+        "enum": ["pending", "confirmed", "failed", "cancelled"]
+      },
+      "TransactionType": {
+        "type": "string",
+        "enum": ["deposit", "withdraw", "transfer", "claim"]
+      },
+      "UserKpi": {
+        "type": "object",
+        "required": [
+          "as_of",
+          "all_time_pnl_usd",
+          "unrealized_pnl_usd",
+          "realized_pnl_usd",
+          "max_drawdown_pct",
+          "sharpe",
+          "sortino"
+        ],
+        "properties": {
+          "all_time_pnl_usd": {
+            "type": "string"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "max_drawdown_pct": {
+            "type": "number",
+            "format": "double"
+          },
+          "realized_pnl_usd": {
+            "type": "string"
+          },
+          "sharpe": {
+            "type": "number",
+            "format": "double"
+          },
+          "sortino": {
+            "type": "number",
+            "format": "double"
+          },
+          "unrealized_pnl_usd": {
+            "type": "string"
+          }
+        }
+      },
+      "UserPositionSummary": {
+        "type": "object",
+        "required": [
+          "vault_id",
+          "as_of",
+          "position_value_usd",
+          "share_balance",
+          "share_price",
+          "total_deposits",
+          "all_time_earned"
+        ],
+        "properties": {
+          "all_time_earned": {
+            "type": "string"
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "first_deposit_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "position_value_usd": {
+            "type": "string"
+          },
+          "share_balance": {
+            "type": "string"
+          },
+          "share_price": {
+            "type": "string"
+          },
+          "total_deposits": {
+            "type": "string"
+          },
+          "vault_id": {
+            "type": "string"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "required": ["address", "chain", "display_currency"],
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "chain": {
+            "type": "string"
+          },
+          "display_currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "UserTransaction": {
+        "type": "object",
+        "required": [
+          "id",
+          "vault_id",
+          "type",
+          "status",
+          "amount",
+          "tx_hash",
+          "timestamp"
+        ],
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TransactionStatus"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tx_hash": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType"
+          },
+          "vault_id": {
+            "type": "string"
+          }
+        }
+      },
+      "UserTransactionHistory": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserTransaction"
+            }
+          },
+          "next_cursor": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "Vault": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "chain",
+          "symbol",
+          "base_asset",
+          "status",
+          "tvl",
+          "share_price",
+          "perf_fee_bps",
+          "contract",
+          "deposit_constraints",
+          "withdraw_constraints",
+          "icons",
+          "api_endpoint"
+        ],
+        "properties": {
+          "api_endpoint": {
+            "type": "string"
+          },
+          "base_asset": {
+            "type": "string"
+          },
+          "chain": {
+            "type": "string"
+          },
+          "chain_id": {
+            "type": ["string", "null"]
+          },
+          "contract": {
+            "$ref": "#/components/schemas/Contract"
+          },
+          "deposit_constraints": {
+            "$ref": "#/components/schemas/DepositConstraints"
+          },
+          "description": {
+            "type": ["string", "null"]
+          },
+          "docs_url": {
+            "type": ["string", "null"]
+          },
+          "icons": {
+            "$ref": "#/components/schemas/Icons"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inception_date": {
+            "type": ["string", "null"]
+          },
+          "mgmt_fee_bps": {
+            "type": ["integer", "null"],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "perf_fee_bps": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "share_price": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "strategy_brief": {
+            "type": ["string", "null"]
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "tvl": {
+            "type": "string"
+          },
+          "withdraw_constraints": {
+            "$ref": "#/components/schemas/WithdrawConstraints"
+          }
+        }
+      },
+      "VaultInfoDTO": {
+        "type": "object",
+        "required": [
+          "current_epoch",
+          "underlying_currency",
+          "pending_withdrawals_assets",
+          "aum",
+          "buffer",
+          "share_price_in_usd"
+        ],
+        "properties": {
+          "aum": {
+            "type": "string",
+            "description": "Assets under management (AUM) in underlying currency"
+          },
+          "buffer": {
+            "type": "string",
+            "description": "Current buffer amount in underlying currency"
+          },
+          "current_epoch": {
+            "type": "string",
+            "description": "Current epoch number"
+          },
+          "pending_withdrawals_assets": {
+            "type": "string",
+            "description": "Total assets required for pending withdrawals (sum of all epochs)"
+          },
+          "share_price_in_usd": {
+            "type": "string",
+            "description": "Current share price in USD"
+          },
+          "underlying_currency": {
+            "type": "string",
+            "description": "The underlying currency ticker (e.g., \"USDC\", \"USDT\")"
+          }
+        }
+      },
+      "VaultListItem": {
+        "type": "object",
+        "required": ["id", "name", "chain", "symbol", "tvl", "apr", "status"],
+        "properties": {
+          "apr": {
+            "type": "string"
+          },
+          "average_redeem_delay": {
+            "type": ["string", "null"]
+          },
+          "chain": {
+            "type": "string"
+          },
+          "description": {
+            "type": ["string", "null"]
+          },
+          "id": {
+            "type": "string"
+          },
+          "last_reported": {
+            "type": ["string", "null"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "tvl": {
+            "type": "string"
+          }
+        }
+      },
+      "VaultListResponse": {
+        "type": "object",
+        "required": ["items"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VaultListItem"
+            }
+          }
+        }
+      },
+      "WithdrawConstraints": {
+        "type": "object",
+        "properties": {
+          "instant_liquidity": {
+            "type": ["boolean", "null"]
+          },
+          "instant_slippage_max_bps": {
+            "type": ["integer", "null"],
+            "format": "int32"
+          },
+          "redeem_24h_threshold_pct_of_aum": {
+            "type": ["number", "null"],
+            "format": "double"
+          },
+          "redeem_48h_above_threshold": {
+            "type": ["boolean", "null"]
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "zerod_bin",
+      "description": "0d, master api"
+    },
+    {
+      "name": "User",
+      "description": "User profile endpoints"
+    },
+    {
+      "name": "Vaults",
+      "description": "Vault management endpoints"
+    }
+  ]
+}
