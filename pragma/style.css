@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+* {
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+/* Light mode (default) */
+.hero-section {
+  background-color: #F0EFEA;
+  margin-bottom: 50px;
+}
+
+/* Dark mode */
+:root.dark .hero-section {
+  background-color: #101010;
+}

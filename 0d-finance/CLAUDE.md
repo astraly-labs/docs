@@ -1,24 +1,15 @@
-# Mintlify Documentation Monorepo
+# 0D Finance Documentation
 
 ## Working relationship
 - You can push back on ideas-this can lead to better documentation. Cite sources and explain your reasoning when you do so
 - ALWAYS ask for clarification rather than making assumptions
 - NEVER lie, guess, or make up information
 
-## Monorepo Structure
-This repository contains two separate Mintlify documentation projects:
-- **`/pragma`**: Pragma Oracle documentation
-- **`/0d-finance`**: 0D Finance documentation
-
-Each subdirectory has its own `docs.json`, content files, and assets. When working on documentation:
-- Identify which documentation you're working on (Pragma or 0D Finance)
-- Navigate to the appropriate subdirectory
-- Each project has its own CLAUDE.md with project-specific instructions
-
 ## Project Context
 - Format: MDX files with YAML frontmatter
-- Config: docs.json for navigation, theme, settings (in each subdirectory)
+- Config: docs.json for navigation, theme, settings
 - Components: Mintlify components
+- Focus: Vault management, liquidity, performance metrics, and user operations
 
 ## Content Strategy
 - Document just enough for user success - not too much, not too little
@@ -30,11 +21,11 @@ Each subdirectory has its own `docs.json`, content files, and assets. When worki
 
 ## docs.json
 - Refer to the [docs.json schema](https://mintlify.com/docs.json) when building the docs.json file and site navigation
-- Each project has its own docs.json in its subdirectory
 
 ## Frontmatter Requirements for Pages
 - title: Clear, descriptive page title
 - description: Concise summary for SEO/navigation
+- For API endpoints: openapi field with format: '/open-apis/0d.json METHOD /endpoint'
 
 ## Writing Standards
 - Second-person voice ("you")
@@ -58,10 +49,9 @@ Each subdirectory has its own `docs.json`, content files, and assets. When worki
 - Use absolute URLs for internal links
 - Include untested code examples
 - Make assumptions - always ask for clarification
-- Create files unless they're absolutely necessary for achieving your goal
-- Skip or disable pre-commit hooks
 
 ## Important Reminders
-- ALWAYS prefer editing an existing file to creating a new one
-- NEVER proactively create documentation files (*.md) or README files unless explicitly requested
-- Do what has been asked; nothing more, nothing less
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

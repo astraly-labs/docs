@@ -1,37 +1,95 @@
-# Pragma Documentation
+# Pragma Documentation Monorepo
 
 <p align="center">
   <img src="https://github.com/astraly-labs/pragma-docs/raw/main/docs/static/img/pragma-og-img.svg" alt="Pragma Logo" width="200"/>
 </p>
 
-> Pragma is the decentralized, transparent and composable oracle network, leveraging state-of-the-art zero-knowledge cryptography.
+> This repository contains the documentation for Pragma Oracle and 0D Finance, built with [Mintlify](https://mintlify.com).
 
-## 🌟 Welcome to Pragma
+## 📚 Documentation Sites
 
-Pragma is revolutionizing the oracle landscape by providing a robust, decentralized solution for bringing offchain data onchain. We're leveraging state of the art zk proofs to ensure data integrity, transparency, and composability across various blockchain ecosystems.
+This monorepo contains two separate Mintlify documentation projects:
 
-## 📚 What's Inside
+### 🔮 Pragma Oracle (`/pragma`)
+Pragma is the decentralized, transparent and composable oracle network, leveraging state-of-the-art zero-knowledge cryptography.
 
-This comprehensive documentation covers:
+**What's covered:**
+- 🧮 **Computational Feeds**: Advanced data processing capabilities
+- 🎲 **Randomness**: Secure, verifiable random number generation
+- 🏛️ **Architecture**: Technical infrastructure deep-dive
+- 🔌 **Pragma API**: Integration guides for StarkNet, StarkEx, and Offchain data
 
-- 🧮 **Computational Feeds**: Learn about our advanced data processing capabilities.
-- 🎲 **Randomness**: Discover how Pragma generates secure, verifiable random numbers.
-- 🏛️ **Architecture**: Dive deep into Pragma's technical infrastructure.
-- 🔌 **Pragma API (StarkEx/Offchain)**: Integrate Pragma into your projects seamlessly.
-- 🚀 **Pragma X**: Coming soon to a blockchain near you!
+### 💰 0D Finance (`/0d-finance`)
+0D Finance documentation covers vault management, liquidity, performance metrics, and user interactions.
 
-## 🚀 Getting Started
+**What's covered:**
+- 🏦 **Vaults**: Vault operations and management
+- 📊 **Performance**: Historical data and KPIs
+- 💧 **Liquidity**: Slippage curves and withdrawal simulations
+- 📈 **APR & Composition**: Returns and asset allocation
+- 👤 **User Operations**: Profile, positions, and transactions
 
-To begin your journey with Pragma:
+## 🚀 Local Development
 
-1. 📖 Browse through our documentation sections
-2. 💻 Check out our [GitHub repository](https://github.com/astraly-labs)
-3. 🤝 Join our [community Discord](https://discord.com/invite/M9aRZtZHU7)
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- Mintlify CLI
 
-## 💡 Need Help?
+### Setup
+```bash
+# Install Mintlify CLI
+npm i -g mintlify
 
-- 📣 For announcements, follow us on [Twitter](https://x.com/PragmaOracle)
-- 🙋‍♀️ For questions, visit our [Blog](https://blog.pragma.build)
-- 🐛 Found a bug? Open an issue on our [GitHub](https://github.com/astraly-labs/pragma-docs/issues)
+# Run Pragma docs locally
+cd pragma
+mintlify dev
 
-Happy building with Pragma! 🎉
+# Or run 0D Finance docs locally
+cd 0d-finance
+mintlify dev
+```
+
+## 📁 Repository Structure
+
+```
+.
+├── pragma/              # Pragma Oracle documentation
+│   ├── docs.json        # Pragma navigation & config
+│   ├── api-reference/   # API documentation
+│   ├── starknet/        # StarkNet integration guides
+│   └── open-apis/       # OpenAPI specifications
+│
+├── 0d-finance/          # 0D Finance documentation
+│   ├── docs.json        # 0D Finance navigation & config
+│   ├── 0d/              # Core 0D content
+│   ├── api-reference/   # 0D API documentation
+│   └── open-apis/       # OpenAPI specifications
+│
+└── README.md            # This file
+```
+
+## 🔗 Useful Links
+
+### Pragma
+- 🌐 [Website](https://pragma.build)
+- 📱 [Twitter](https://x.com/PragmaOracle)
+- 📝 [Blog](https://blog.pragma.build)
+- 💬 [Discord](https://discord.com/invite/M9aRZtZHU7)
+- 🐙 [GitHub](https://github.com/astraly-labs)
+
+### 0D Finance
+- 🌐 [Website](https://0d.finance)
+- 💬 [Community](https://t.me/+Xri-uUMpWXI3ZmRk)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This documentation is licensed under [MIT License](LICENSE).
+
+---
+
+Happy building! 🎉

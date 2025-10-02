@@ -1,0 +1,121 @@
+---
+mode: "custom"
+---
+export function openSearch() {
+  document.getElementById('search-bar-entry').click();
+}
+
+<div className="hero-section" style={{ position: 'relative' }}>
+  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'url(/logo/background.svg)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15, zIndex: 0 }}></div>
+  <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8" style={{ position: 'relative', zIndex: 1 }}>
+    <div className="text-center ">
+      <h1 className="text-6xl pt-10 tracking-tight pb-10 text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
+        0D Finance
+      </h1>
+      <h2 className="text-xl tracking-tight pb-4 text-gray-900 dark:text-white">
+        Integrate institutional-grade DeFi vaults into your application
+      </h2>
+      <div className="pb-8 max-w-2xl mx-auto">
+      <div className="flex max-w-2xl items-center justify-center mx-auto" style={{ maxWidth: '500px' }}>
+    <button
+      type="button"
+      className="hidden w-full lg:flex items-center text-sm leading-6 rounded-full py-2 pl-3 pr-3 shadow-sm text-gray-400 dark:text-white/50 bg-background-light dark:bg-background-dark dark:brightness-[1.1] dark:ring-1 dark:hover:brightness-[1.25] ring-1 ring-gray-400/20 hover:ring-gray-600/25 dark:ring-gray-600/30 dark:hover:ring-gray-500/30 focus:outline-primary"
+      id="home-search-entry"
+      style={{
+        marginTop: '2rem',
+        maxWidth: '100rem',
+        width: '90%',
+        margin: '2rem auto 0'
+      }}
+      onClick={openSearch}
+    >
+      <svg
+        className="h-4 w-4 ml-1.5 flex-none bg-primary-light hover:bg-gray-600 dark:bg-white/50 dark:hover:bg-white/70"
+        style={{
+          marginRight: '0.5rem',
+         maskImage:
+           'url("https://mintlify.b-cdn.net/v6.5.1/solid/magnifying-glass.svg")',
+         maskRepeat: 'no-repeat',
+         maskPosition: 'center center',
+        }}
+      />
+
+      Search vaults, strategies, API docs...
+    </button>
+    </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="mx-auto justify-center items-center w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+<div className="text-2xl font-bold text-center pb-8">Get started with vaults and integrations</div>
+<div className="max-w-5xl mx-auto">
+<CardGroup cols={3}>
+  <Card
+    title="Explore Our Vaults"
+    icon="vault"
+    href="/0d/introduction"
+  >
+    Discover our curated DeFi strategies and vault offerings.
+  </Card>
+  <Card
+    title="API Documentation"
+    icon="code"
+    href="/api-reference/0d/list-vaults"
+  >
+    Integrate vault data, performance metrics, and user portfolios.
+  </Card>
+  <Card
+    title="View Changelog"
+    icon="clock-rotate-left"
+    href="/0d/changelog"
+  >
+    Stay updated with the latest vault strategies and API changes.
+  </Card>
+</CardGroup>
+
+<div className="mt-16">
+  <h3 className="text-xl font-bold text-center pb-6">What is 0D Finance?</h3>
+  <div className="max-w-3xl mx-auto text-center pb-8">
+    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+      0D Finance is a DeFi curator building institutional-grade vault strategies on Starknet.
+      We leverage battle-tested infrastructure and sophisticated strategies to maximize returns
+      while managing risk for our users.
+    </p>
+  </div>
+</div>
+
+<div className="mt-12">
+  <h3 className="text-xl font-bold text-center pb-6">Key Features</h3>
+  <CardGroup cols={2}>
+    <Card
+      title="Curated Strategies"
+      icon="chess"
+    >
+      Expert-managed vault strategies optimized for risk-adjusted returns across DeFi protocols.
+    </Card>
+    <Card
+      title="Comprehensive API"
+      icon="plug"
+    >
+      Access real-time vault data, performance metrics, liquidity analysis, and user portfolios.
+    </Card>
+    <Card
+      title="Transparent Performance"
+      icon="chart-line"
+    >
+      Track detailed KPIs including Sharpe ratios, drawdowns, APR history, and composition changes.
+    </Card>
+    <Card
+      title="Built on Starknet"
+      icon="shield"
+    >
+      Leveraging the audited Starknet Vault Kit for secure and efficient vault infrastructure.
+    </Card>
+  </CardGroup>
+</div>
+
+</div>
+</div>
