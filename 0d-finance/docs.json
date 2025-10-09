@@ -23,14 +23,18 @@
         "tab": "Learn",
         "groups": [
           {
-            "group": "About 0D",
-            "pages": ["0d/introduction"]
+            "group": "Introduction",
+            "pages": ["learn/introduction"]
           }
         ]
       },
       {
         "tab": "API Reference",
         "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["0d/introduction"]
+          },
           {
             "group": "Vaults",
             "pages": [
