@@ -23,8 +23,59 @@
         "tab": "Learn",
         "groups": [
           {
-            "group": "Introduction",
-            "pages": ["learn/introduction"]
+            "group": "Overview",
+            "pages": [
+              "learn/overview/introduction-to-0d",
+              "learn/overview/vaults-at-a-glance",
+              "learn/overview/methodology-and-design"
+            ]
+          },
+          {
+            "group": "Vault Strategies",
+            "pages": [
+              "learn/vault-strategies/usdc-carry-trade",
+              "learn/vault-strategies/btc-delta-neutral",
+              "learn/vault-strategies/future-vaults"
+            ]
+          },
+          {
+            "group": "Risk & Methodology",
+            "pages": [
+              "learn/risk-methodology/risk-framework",
+              "learn/risk-methodology/liquidity-and-withdrawals",
+              "learn/risk-methodology/transparency-and-audits"
+            ]
+          },
+          {
+            "group": "Performance & Analytics",
+            "pages": [
+              "learn/performance-analytics/historical-performance",
+              "learn/performance-analytics/metrics-and-kpis",
+              "learn/performance-analytics/vault-reports"
+            ]
+          },
+          {
+            "group": "Team & Partners",
+            "pages": [
+              "learn/team-partners/the-team",
+              "learn/team-partners/partners-and-integrations"
+            ]
+          },
+          {
+            "group": "Legal & Compliance",
+            "pages": [
+              "learn/legal-compliance/legal-structure",
+              "learn/legal-compliance/regulatory-positioning",
+              "learn/legal-compliance/disclaimers-and-terms"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "learn/resources/faq",
+              "learn/resources/glossary",
+              "learn/resources/contact-and-support"
+            ]
           }
         ]
       },
