@@ -3,27 +3,36 @@ title: "Introduction to 0D Finance"
 description: "Learn about 0D Finance and our mission to commoditize the cost of capital"
 ---
 
-# Introduction to 0D Finance
-
 0D Finance is building the infrastructure for the commoditization of capital: programmable, transparent, and global.
 
 Our first products are institutional-grade vaults that transform sophisticated market strategies into accessible onchain primitives, bringing efficiency, neutrality, and scale to the next era of decentralized finance.
 
 ## What We Do
 
-We create vault strategies that deliver consistent returns while minimizing risk through better capital allocation. Our goal is to make DeFi work like traditional finance should: efficient, accessible, and profitable for everyone.
+We currate vault strategies that deliver consistent returns while minimizing risk through better capital allocation. Our goal is to make DeFi work like traditional finance should: efficient, accessible, and profitable for everyone.
 
 ## Key Principles
 
-- **Capital Efficiency**: Maximizing returns while minimizing risk
+- **Capital Efficiency**: Maximizing returns while mitigating risk
 - **Transparency**: Open and auditable strategies
 - **Accessibility**: Making institutional-grade strategies available to all
 - **Innovation**: Pioneering new approaches to decentralized finance
+
+## Vault infrastructure
+
+### Starknet
+
+The USDC strategy relies on the [Starknet Vault Kit](https://github.com/ForgeYields/starknet_vault_kit/tree/main). The official open-source Starknet vault contracts. While the BTC strategy relies on the [Vesu vault](https://docs.vesu.xyz/explore/vaults), which is a derived version of the Starknet Vault Kit.
+
+Both Starknet Vault Kit and Vesu Vault have been under multiple audits:
+
+- The Starknet Vault Kit was audited by [Zenith](https://github.com/ForgeYields/audits/blob/main/Forge%20-%20Zenith%20Audit%20Report.pdf) and [Caro Security Clan](https://github.com/ForgeYields/audits/blob/main/Forge%20-%20Csc%20Audit%20Report.pdf)
+- Vesu vault was audited twice by Sherlock: [2025.09.23](https://github.com/sherlock-protocol/sherlock-reports/blob/main/audits/2025_09_23_Final_Vesu_Starknet_Vault_Kit_Collaborative_Audit_Report.pdf) & [2025.10.31](https://github.com/sherlock-protocol/sherlock-reports/blob/main/audits/2025.10.31%20-%20Final%20-%20Vesu%20Vaults%20Collaborative%20Audit%20Report%201761914943.pdf)
 
 ## Getting Started
 
 Ready to explore 0D Finance? Here's where to start:
 
-- **[Explore Our Vaults](/learn/overview/vaults-at-a-glance)**: Learn about our vault strategies and offerings
-- **[Risk Framework](/learn/risk-methodology/risk-framework)**: Understand our approach to risk management
-- **[FAQ](/learn/resources/faq)**: Common questions and answers
+- [**Explore Our Vaults**](/learn/overview/vaults-at-a-glance): Learn about our vault strategies and offerings
+- [**Risk Framework**](/learn/risk-methodology/risk-framework): Understand our approach to risk management
+- [**FAQ**](/learn/resources/faq): Common questions and answers
