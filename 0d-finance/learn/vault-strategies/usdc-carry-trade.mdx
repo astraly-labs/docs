@@ -1,10 +1,30 @@
 ---
 title: "USDC Carry Trade"
-description: "Overview of our USDC carry trade strategy"
+description: "A Carry Trade strategy in crypto typically involves holding a long position in a spot asset while simultaneously taking a short position in the corresponding perpetual futures contract. This setup enables investors to generate returns from two main sources: lending interest and the funding premia."
 ---
 
-# USDC Carry Trade
+## Overview
 
-Overview of our USDC carry trade strategy.
+In the 0DusdcCARRY vault, for every dollar invested, 40% is allocated as margin on Extended to support perpetual trading. The remaining 60% is bridged to Ethereum Layer 1, using either Starknet’s native bridge or the upcoming native USDC bridge. Once on Ethereum, the bridged USDC is swapped into wBTC. After this conversion, the wBTC is bridged back to Starknet and deposited into Vesu, a Starknet-native money market protocol, specifically into the re7 USDC Prime pool.
 
-*Content coming soon.*
+Using the deposited wBTC as collateral, the strategy initiates two borrowing loops using USDC as debt, targeting a 47% LTV ratio on Vesu. On the perpetual side, the strategy targets a 2.9x leverage on Extended. Combined, this results in an effective 1.16x leverage on the AUM.
+
+This carefully structured approach is designed to extract consistent yield while maintaining strong risk controls. Since proper risk management is critical, the strategy remains conservative by design. One key challenge is execution cost, particularly during rebalancing.
+
+By keeping leverage moderate and allowing more time between rebalancing cycles, the strategy is able to minimize execution costs without compromising performance.
+
+## Risk Parameters
+
+- Target LTV: 47%
+- Target Leverage on Extended: 3x
+- Rebalancing: when one venue hits 25% to liquidation
+- Leverage on AUM: 1.16x
+
+## Economic Model
+
+We take a 20% performance fee and charges no management fee, ensuring strong alignment with investors and maximizing net returns.
+
+## Contract
+
+| 0DusdcCARRY | [0x783b6c014ae99767df5120dd5c4ebea998e78944d92aee457dfc7e86a405349](https://voyager.online/contract/0x0783B6c014aE99767df5120Dd5c4eBea998E78944d92aee457dFC7e86A405349) |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
