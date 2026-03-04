@@ -1,0 +1,299 @@
+---
+title: Consume Data
+description: "Query price feeds from the Pragma Miden oracle via the Rust client"
+---
+
+This guide shows how to build a Rust application that reads on-chain price data from the Pragma oracle using [Foreign Procedure Invocation (FPI)](https://docs.miden.xyz/builder/develop/tutorials/rust-client/foreign_procedure_invocation_tutorial).
+
+<Card title="Ready-to-run example" icon="github" href="https://github.com/astraly-labs/pragma-miden/tree/main/examples/consume-price">
+  Clone the repo and run `cargo run --release -p consume-price` — reads BTC/USD from the Pragma oracle on testnet, no configuration needed.
+</Card>
+
+## How it works
+
+Pragma Miden uses a decentralized publisher model: the oracle account stores only a registry of publisher IDs — prices live in each publisher's own account. Consuming price data requires:
+
+1. Fetching the oracle's storage to discover all registered publisher IDs
+2. Importing each publisher account as a `ForeignAccount`
+3. Running a transaction script that calls `get_median` on the oracle via FPI
+
+The oracle performs the aggregation on-chain and returns the median to your stack.
+
+---
+
+## Step 1: Set up your project
+
+```bash
+cargo new miden-price-reader
+cd miden-price-reader
+```
+
+`Cargo.toml`:
+
+```toml
+[dependencies]
+miden-client            = { version = "0.13.2", features = ["testing", "tonic"] }
+miden-client-sqlite-store = { version = "0.13.2" }
+miden-protocol          = { version = "0.13" }
+miden-standards         = { version = "0.13" }
+tokio                   = { version = "1", features = ["rt-multi-thread", "macros"] }
+rand                    = { version = "0.9" }
+anyhow                  = "1"
+```
+
+---
+
+## Step 2: Resolve the oracle's foreign accounts
+
+Because Pragma's oracle depends on multiple publishers, you must import every registered publisher account alongside the oracle itself before executing the FPI call.
+
+`src/main.rs`:
+
+```rust
+use anyhow::Context;
+use miden_client::{
+    account::AccountId,
+    builder::ClientBuilder,
+    keystore::FilesystemKeyStore,
+    rpc::{
+        domain::account::{AccountStorageRequirements, StorageMapKey},
+        Endpoint, GrpcClient,
+    },
+    store::AccountRecordData,
+    transaction::{ForeignAccount, TransactionRequestBuilder},
+    Client, ClientError, Felt, Word, ZERO,
+};
+use miden_client_sqlite_store::ClientBuilderSqliteExt;
+use miden_protocol::{account::StorageSlotName, transaction::TransactionKernel};
+use miden_standards::code_builder::CodeBuilder;
+use miden_client::transaction::AdviceInputs;
+use std::{collections::BTreeSet, sync::Arc};
+
+/// Fetches the oracle account, reads all registered publisher IDs from its
+/// storage map, imports each one, and returns the full list of ForeignAccounts
+/// needed to call `get_median` via FPI.
+async fn get_oracle_foreign_accounts(
+    client: &mut Client<FilesystemKeyStore>,
+    oracle_id: AccountId,
+    faucet_id_word: Word,
+) -> anyhow::Result<Vec<ForeignAccount>> {
+    client.import_account_by_id(oracle_id).await?;
+    client.sync_state().await?;
+
+    let oracle_record = client
+        .get_account(oracle_id)
+        .await?
+        .context("oracle account not found")?;
+
+    let oracle = match oracle_record.account_data() {
+        AccountRecordData::Full(acc) => acc,
+        _ => anyhow::bail!("expected full oracle account data"),
+    };
+
+    let storage = oracle.storage();
+
+    // Slot 0: next_publisher_index — tells us how many publishers are registered
+    let count_slot = StorageSlotName::new("pragma::oracle::next_publisher_index")?;
+    let publisher_count = storage
+        .get_item(&count_slot)
+        .context("unable to read publisher count")?[0]
+        .as_int();
+
+    // Slot 1: publishers map — keys are [index, 0, 0, 0], values are publisher account words
+    let publishers_slot = StorageSlotName::new("pragma::oracle::publishers")?;
+    let publisher_ids: Vec<AccountId> = (2..publisher_count)
+        .map(|i| -> anyhow::Result<AccountId> {
+            let key: Word = [Felt::new(i), ZERO, ZERO, ZERO].into();
+            let w = storage
+                .get_map_item(&publishers_slot, key)
+                .with_context(|| format!("publisher at index {i} not found"))?;
+            Ok(AccountId::new_unchecked([w[3], w[2]]))
+        })
+        .collect::<Result<_, _>>()?;
+
+    // Build ForeignAccount list: each publisher (with its entries map) + the oracle
+    let entries_slot = StorageSlotName::new("pragma::publisher::entries")?;
+    let mut foreign_accounts: Vec<ForeignAccount> = vec![];
+
+    for pid in publisher_ids {
+        client.import_account_by_id(pid).await?;
+        let fa = ForeignAccount::public(
+            pid,
+            AccountStorageRequirements::new([(
+                entries_slot.clone(),
+                &[StorageMapKey::from(faucet_id_word)],
+            )]),
+        )?;
+        foreign_accounts.push(fa);
+    }
+
+    foreign_accounts.push(ForeignAccount::public(
+        oracle_id,
+        AccountStorageRequirements::default(),
+    )?);
+
+    Ok(foreign_accounts)
+}
+```
+
+---
+
+## Step 3: Call `get_median` via FPI
+
+The oracle's `get_median` procedure is called from a transaction script that runs against your own ephemeral account. The script pushes the pair identifier and executes FPI on the oracle.
+
+```rust
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // -------------------------------------------------------------------------
+    // Build client
+    // -------------------------------------------------------------------------
+    let rpc = Arc::new(GrpcClient::new(&Endpoint::testnet(), 10_000));
+    let keystore = Arc::new(
+        FilesystemKeyStore::new("./keystore".into()).unwrap(),
+    );
+    let mut client = ClientBuilder::new()
+        .rpc(rpc)
+        .sqlite_store("./store.sqlite3")
+        .authenticator(keystore.clone())
+        .in_debug_mode(true.into())
+        .build()
+        .await?;
+
+    println!("Latest block: {}", client.sync_state().await?.block_num);
+
+    // -------------------------------------------------------------------------
+    // Oracle configuration (testnet) — check latest address at github.com/astraly-labs/pragma-miden#deployments
+    // -------------------------------------------------------------------------
+    let oracle_id = AccountId::from_hex("0xafebd403be621e005bf03b9fec7fe8")?;
+
+    // BTC/USD — faucet_id "1:0" → [prefix=1, suffix=0, 0, 0]
+    let faucet_id_word: Word = [Felt::new(1), Felt::new(0), ZERO, ZERO].into();
+    let (prefix, suffix) = (1u64, 0u64);
+    let amount = 0u64;
+
+    // -------------------------------------------------------------------------
+    // Resolve foreign accounts (oracle + all publishers)
+    // -------------------------------------------------------------------------
+    let foreign_accounts =
+        get_oracle_foreign_accounts(&mut client, oracle_id, faucet_id_word).await?;
+
+    // -------------------------------------------------------------------------
+    // Build the transaction script
+    //
+    // The script calls get_median via FPI using the oracle component library.
+    // Stack input: [amount, suffix, prefix, 0]   (TOS = 0)
+    // Stack output: [amount, is_tracked, median]
+    // -------------------------------------------------------------------------
+    let script_code = format!(
+        "
+        use oracle_component::oracle_module
+        use miden::core::sys
+
+        begin
+            push.0.{amount}.{suffix}.{prefix}
+            call.oracle_module::get_median
+            exec.sys::truncate_stack
+        end
+        ",
+        prefix = prefix,
+        suffix = suffix,
+        amount = amount,
+    );
+
+    // get_oracle_component_library() compiles oracle.masm and exposes get_median
+    // You can import it from: pm_accounts::oracle::get_oracle_component_library
+    // Or inline the library build here using miden_protocol primitives.
+    use pm_accounts::oracle::get_oracle_component_library;
+    let script = CodeBuilder::default()
+        .with_dynamically_linked_library(&get_oracle_component_library())
+        .map_err(|e| anyhow::anyhow!("{e:?}"))?
+        .compile_tx_script(script_code)
+        .map_err(|e| anyhow::anyhow!("{e:?}"))?;
+
+    // -------------------------------------------------------------------------
+    // Execute (read-only: execute_program, not submit_new_transaction)
+    // -------------------------------------------------------------------------
+    let fa_set: BTreeSet<ForeignAccount> = foreign_accounts.into_iter().collect();
+    let output_stack = client
+        .execute_program(oracle_id, script, AdviceInputs::default(), fa_set)
+        .await
+        .map_err(|e| anyhow::anyhow!("{e:?}"))?;
+
+    // Stack layout: [amount, is_tracked, median, ...]
+    let median     = output_stack[1].as_int();
+    let is_tracked = output_stack[0].as_int();
+
+    if is_tracked == 0 {
+        println!("Asset is not tracked by the oracle.");
+    } else {
+        // Prices use 6 decimal places
+        println!("BTC/USD median: {} (raw: {})", median as f64 / 1_000_000.0, median);
+    }
+
+    Ok(())
+}
+```
+
+---
+
+## Step 4: Run
+
+```bash
+cargo run --release
+# Latest block: 631042
+# BTC/USD median: 84500.0 (raw: 84500000000)
+```
+
+---
+
+## Response format
+
+| Stack position | Field        | Description                                       |
+|----------------|--------------|---------------------------------------------------|
+| `[0]`          | `is_tracked` | `1` if the asset has data, `0` if not registered |
+| `[1]`          | `median`     | Median price scaled by `10^6`                    |
+| `[2]`          | `amount`     | Echo of the input `amount` parameter             |
+
+Prices use **6 decimal places** — divide by `1_000_000` to get the USD value.
+
+---
+
+## Available assets
+
+| faucet_id | `prefix` | Asset    |
+|-----------|----------|----------|
+| `1:0`     | `1`      | BTC/USD  |
+| `2:0`     | `2`      | ETH/USD  |
+| `3:0`     | `3`      | SOL/USD  |
+| `4:0`     | `4`      | BNB/USD  |
+| `5:0`     | `5`      | XRP/USD  |
+| `6:0`     | `6`      | HYPE/USD |
+| `7:0`     | `7`      | POL/USD  |
+
+---
+
+## Oracle reference
+
+<Note>
+  Contract addresses change between testnet iterations. Always refer to the [pragma-miden README](https://github.com/astraly-labs/pragma-miden#deployments) for the latest oracle ID.
+</Note>
+
+<Tip>
+  The oracle library (`pm_accounts::oracle`) is published as part of [pragma-miden](https://github.com/astraly-labs/pragma-miden). You can add it as a git dependency or copy the compiled MASM into your own project.
+</Tip>
+
+---
+
+## CLI (quick testing)
+
+For quick spot-checks without writing Rust, the `pm-oracle-cli` wraps the same logic:
+
+```bash
+# Single asset
+pm-oracle-cli median 1:0 --network testnet
+# Median value: 84500000000 (amount: 0)
+
+# Multiple assets — 47% faster (single sync)
+pm-oracle-cli median-batch 1:0 2:0 3:0 --network testnet --json
+```

@@ -1,0 +1,63 @@
+---
+title: Introduction
+description: "Pragma Oracle on Polygon Miden"
+---
+
+<Card title="Pragma on Miden" icon="shield-halved">
+  A native oracle implementation for the Polygon Miden zkVM — decentralized, verifiable, and built for privacy-preserving applications.
+</Card>
+
+## What is Pragma Miden?
+
+Pragma Miden brings Pragma's oracle infrastructure to [Polygon Miden](https://docs.polygon.technology/miden/), a zero-knowledge virtual machine that enables client-side proving and strong privacy guarantees.
+
+Unlike traditional oracle models, Pragma Miden leverages the Miden account model: publishers write prices directly to their own on-chain accounts, and the oracle aggregates across all registered publishers at query time — entirely on-chain, with no off-chain intermediary.
+
+## Architecture
+
+<CardGroup cols={2}>
+  <Card title="Oracle Account" icon="database">
+    Maintains a registry of trusted publishers and computes the median price on demand across all of them.
+  </Card>
+  <Card title="Publisher Accounts" icon="server">
+    Each publisher owns its own on-chain account and writes price data directly to its own storage.
+  </Card>
+</CardGroup>
+
+### How it works
+
+<Steps>
+  <Step title="Publishers push prices">
+    Each publisher submits a self-transaction that writes a price entry (pair, price, decimals, timestamp) into their own account storage.
+  </Step>
+  <Step title="Oracle aggregates on query">
+    When a consumer queries `median`, the Oracle account fetches the latest entry from every registered publisher and computes the median — on-chain, verifiably.
+  </Step>
+  <Step title="Result returned">
+    The oracle returns `is_tracked`, `median_price`, and an optional `amount` parameter — all verifiable by the Miden proof system.
+  </Step>
+</Steps>
+
+## Asset IDs (faucet_id)
+
+Pragma Miden identifies assets with a `prefix:suffix` format:
+
+| faucet_id | Asset   |
+|-----------|---------|
+| `1:0`     | BTC/USD |
+| `2:0`     | ETH/USD |
+| `3:0`     | SOL/USD |
+| `4:0`     | BNB/USD |
+| `5:0`     | XRP/USD |
+| `6:0`     | HYPE/USD |
+| `7:0`     | POL/USD |
+
+## Deployments
+
+<Note>
+  Contract addresses change between testnet iterations. Always refer to the [pragma-miden README](https://github.com/astraly-labs/pragma-miden#deployments) for the latest deployed addresses.
+</Note>
+
+<Tip>
+  Ready to integrate? Jump to [Publish Prices](./publisher) or [Consume Data](./consumer).
+</Tip>
