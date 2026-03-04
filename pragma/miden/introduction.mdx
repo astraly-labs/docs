@@ -1,26 +1,28 @@
 ---
 title: Introduction
-description: "Pragma Oracle on Polygon Miden"
+description: "Pragma Oracle on Miden"
 ---
 
 <Card title="Pragma on Miden" icon="shield-halved">
-  A native oracle implementation for the Polygon Miden zkVM — decentralized, verifiable, and built for privacy-preserving applications.
+  A native oracle implementation for Miden — decentralized, verifiable, and designed around Miden's actor model and client-side proving architecture.
 </Card>
 
 ## What is Pragma Miden?
 
-Pragma Miden brings Pragma's oracle infrastructure to [Polygon Miden](https://docs.polygon.technology/miden/), a zero-knowledge virtual machine that enables client-side proving and strong privacy guarantees.
+Pragma Miden brings Pragma's oracle infrastructure to [Miden](https://docs.miden.xyz/builder/), a zero-knowledge rollup that rethinks blockchain architecture around privacy and parallel execution.
 
-Unlike traditional oracle models, Pragma Miden leverages the Miden account model: publishers write prices directly to their own on-chain accounts, and the oracle aggregates across all registered publishers at query time — entirely on-chain, with no off-chain intermediary.
+On Miden, each account is an independent state machine. Transactions are **executed and proven locally** by the client — the network only stores cryptographic commitments, never raw state. This enables parallel transaction processing and strong privacy guarantees by default.
+
+Pragma Miden is built directly on top of this model: publishers write prices to their own accounts via self-transactions, and the oracle aggregates across all registered publishers at query time using [Foreign Procedure Invocation (FPI)](https://docs.miden.xyz/builder/develop/tutorials/rust-client/foreign_procedure_invocation_tutorial) — no off-chain intermediary, no trusted aggregator.
 
 ## Architecture
 
 <CardGroup cols={2}>
   <Card title="Oracle Account" icon="database">
-    Maintains a registry of trusted publishers and computes the median price on demand across all of them.
+    Maintains a registry of trusted publisher account IDs. Computes the median price on demand by reading across all publisher accounts via FPI.
   </Card>
   <Card title="Publisher Accounts" icon="server">
-    Each publisher owns its own on-chain account and writes price data directly to its own storage.
+    Each publisher is a Miden account that owns its own storage. Publishers write price entries via self-transactions — local execution, STARK-proven, submitted to the network.
   </Card>
 </CardGroup>
 
@@ -28,29 +30,29 @@ Unlike traditional oracle models, Pragma Miden leverages the Miden account model
 
 <Steps>
   <Step title="Publishers push prices">
-    Each publisher submits a self-transaction that writes a price entry (pair, price, decimals, timestamp) into their own account storage.
+    A publisher executes a self-transaction locally, proven by the Miden VM. The transaction calls `publish_entry` on the publisher's own account, writing a `(pair, price, decimals, timestamp)` word into its storage map.
   </Step>
   <Step title="Oracle aggregates on query">
-    When a consumer queries `median`, the Oracle account fetches the latest entry from every registered publisher and computes the median — on-chain, verifiably.
+    When a consumer calls `get_median`, the oracle account uses FPI to read the latest entry from each registered publisher account. It then computes the median across all available prices — fully on-chain, with the result verifiable by the Miden proof system.
   </Step>
-  <Step title="Result returned">
-    The oracle returns `is_tracked`, `median_price`, and an optional `amount` parameter — all verifiable by the Miden proof system.
+  <Step title="Result returned on the stack">
+    The oracle returns `is_tracked` and `median_price` on the Miden VM stack. Because the entire computation is locally proven, the consumer can verify correctness without trusting any third party.
   </Step>
 </Steps>
 
 ## Asset IDs (faucet_id)
 
-Pragma Miden identifies assets with a `prefix:suffix` format:
+Pragma Miden identifies assets with a `prefix:suffix` format, corresponding to the `[prefix, suffix, 0, 0]` word pushed onto the Miden stack:
 
-| faucet_id | Asset   |
-|-----------|---------|
-| `1:0`     | BTC/USD |
-| `2:0`     | ETH/USD |
-| `3:0`     | SOL/USD |
-| `4:0`     | BNB/USD |
-| `5:0`     | XRP/USD |
+| faucet_id | Asset    |
+|-----------|----------|
+| `1:0`     | BTC/USD  |
+| `2:0`     | ETH/USD  |
+| `3:0`     | SOL/USD  |
+| `4:0`     | BNB/USD  |
+| `5:0`     | XRP/USD  |
 | `6:0`     | HYPE/USD |
-| `7:0`     | POL/USD |
+| `7:0`     | POL/USD  |
 
 ## Deployments
 
