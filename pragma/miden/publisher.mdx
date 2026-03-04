@@ -1,0 +1,160 @@
+---
+title: Publish Prices
+description: "Become a Pragma Miden publisher and push price data on-chain"
+---
+
+<Warning>
+  **Work in progress** — This integration is under active development. The API described here reflects the target state, not the current release. Reach out on [Telegram](https://t.me/pragma_oracle) if you want early access.
+</Warning>
+
+Publishers submit price data directly to their own Miden account. The Oracle reads from all registered publishers when computing the median.
+
+If you are already publishing on Starknet via `pragma-sdk`, adding Miden support requires minimal changes — the same pipeline pushes to both networks automatically.
+
+---
+
+## Step 1 — Install
+
+```bash
+pip install pragma-sdk
+```
+
+`pragma-sdk` includes `pm-publisher` as a dependency. No Rust toolchain required.
+
+---
+
+## Step 2 — Initialize your publisher account
+
+Run this once. It creates your publisher account on Miden and writes your credentials locally.
+
+```python
+import asyncio
+from pragma_sdk.miden.client import PragmaMidenClient
+
+async def main():
+    client = PragmaMidenClient(network="testnet")
+    await client.initialize()
+    print(f"Your publisher ID: {client.publisher_id}")
+
+asyncio.run(main())
+```
+
+This creates three files in your working directory:
+
+| File | Purpose |
+|------|---------|
+| `pragma_miden.json` | Your publisher ID and oracle address |
+| `keystore/` | Account signing keys — back this up |
+| `miden_storage/store.sqlite3` | Local chain state |
+
+<Warning>
+  Back up your `keystore/` directory. Losing it means losing access to your publisher account.
+</Warning>
+
+---
+
+## Step 3 — Get registered
+
+Share your publisher ID (from `pragma_miden.json`) with the Pragma team. We will register it on the oracle so your prices are included in the median computation.
+
+```json
+{
+  "networks": {
+    "testnet": {
+      "publisher_account_ids": ["0x<your-publisher-id>"]
+    }
+  }
+}
+```
+
+<Note>
+  Registration is currently manual. Reach out via [Discord](https://discord.gg/pragma) or [Telegram](https://t.me/pragma_oracle).
+</Note>
+
+---
+
+## Step 4 — Publish prices
+
+Once registered, publish entries as part of your existing data pipeline:
+
+```python
+import asyncio
+from pragma_sdk.miden.client import PragmaMidenClient, MidenEntry
+
+async def main():
+    client = PragmaMidenClient(network="testnet")
+
+    entries = [
+        MidenEntry(pair="1:0", price=85_000_000_000, decimals=6),  # BTC/USD = $85,000
+        MidenEntry(pair="2:0", price=2_200_000_000,  decimals=6),  # ETH/USD = $2,200
+    ]
+
+    results = await client.publish_entries(entries)
+    print(results)  # [True, True]
+
+asyncio.run(main())
+```
+
+`publish_entries` is lazy — it reuses existing credentials without calling `initialize()` again. A failure on one entry does not abort the others.
+
+---
+
+## Starknet + Miden together
+
+If you already run a Starknet publisher, Miden publishing hooks into the same loop with no extra configuration:
+
+```python
+from pragma_sdk.client import PragmaClient
+from pragma_sdk.miden.client import PragmaMidenClient, MidenEntry
+
+starknet = PragmaClient(...)
+miden    = PragmaMidenClient(network="testnet")
+
+# Same price data, two networks
+price = fetch_btc_price()
+
+await starknet.publish_entries([...])
+await miden.publish_entries([MidenEntry(pair="1:0", price=price, decimals=6)])
+```
+
+---
+
+## Available pairs
+
+| faucet_id | Asset    |
+|-----------|----------|
+| `1:0`     | BTC/USD  |
+| `2:0`     | ETH/USD  |
+| `3:0`     | SOL/USD  |
+| `4:0`     | BNB/USD  |
+| `5:0`     | XRP/USD  |
+| `6:0`     | HYPE/USD |
+| `7:0`     | POL/USD  |
+
+Prices use **6 decimal places** — multiply the USD value by `1_000_000`.
+
+---
+
+## API reference
+
+```python
+class PragmaMidenClient:
+    def __init__(
+        self,
+        network: str = "testnet",        # "testnet" | "devnet" | "local"
+        oracle_id: str | None = None,    # read from pragma_miden.json if omitted
+        storage_path: str | None = None, # CWD by default
+        keystore_path: str | None = None,
+    ): ...
+
+    async def initialize(self) -> None: ...
+    async def publish_entries(self, entries: list[MidenEntry]) -> list[bool]: ...
+    async def get_entry(self, pair: str) -> str | None: ...
+    async def sync(self) -> None: ...
+
+class MidenEntry:
+    pair: str       # faucet_id, e.g. "1:0"
+    price: int      # integer scaled by 10**decimals
+    decimals: int
+    timestamp: int  # unix timestamp, defaults to now
+```

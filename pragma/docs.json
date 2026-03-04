@@ -57,6 +57,24 @@
         ]
       },
       {
+        "tab": "Miden",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "miden/introduction"
+            ]
+          },
+          {
+            "group": "Integrate",
+            "pages": [
+              "miden/publisher",
+              "miden/consumer"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "PragmAPI",
         "groups": [
           {
