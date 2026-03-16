@@ -1,0 +1,88 @@
+---
+title: "Getting Started"
+description: "Get up and running with Pragma Glacier in under 5 minutes."
+---
+
+<Steps>
+  <Step title="Get an API Key">
+    Sign up at [data.pragma.build](https://data.pragma.build/signup) to get your free API key.
+    Your key will look like `glc_abc123...`.
+  </Step>
+  <Step title="Install the SDK">
+    <CodeGroup>
+    ```bash pip
+    pip install pragma-glacier
+    ```
+    ```bash pip (with data extras)
+    pip install pragma-glacier[data]
+    ```
+    </CodeGroup>
+
+    The `[data]` extra includes `polars` and `pyarrow` for loading Parquet files directly into DataFrames.
+  </Step>
+  <Step title="Authenticate">
+    Set your API key as an environment variable or use the CLI:
+
+    <CodeGroup>
+    ```bash Environment Variable
+    export GLACIER_API_KEY="glc_your_key_here"
+    ```
+    ```bash CLI Login
+    glacier auth login
+    # Prompts for your API key and saves it to ~/.pragma/config.toml
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Explore Datasets">
+    ```python Python
+    from pragma_glacier import GlacierClient
+
+    client = GlacierClient()
+
+    # See what's available
+    datasets = client.list_datasets()
+    for ds in datasets:
+        print(f"{ds.name}: {ds.description}")
+    ```
+  </Step>
+  <Step title="Download Your First Data">
+    ```python Python
+    # List available files
+    files = client.list_files(
+        dataset="trades",
+        start="2026-03-01",
+        end="2026-03-07"
+    )
+    print(f"Found {files.file_count} files ({files.total_size} bytes)")
+
+    # Download them
+    client.download(files, output_dir="./data", parallel=4)
+    ```
+  </Step>
+  <Step title="Load and Analyze">
+    ```python Python
+    # Load directly into a Polars DataFrame
+    df = client.to_polars(
+        dataset="trades",
+        start="2026-03-01",
+        end="2026-03-07"
+    )
+    print(df.head())
+    print(df.describe())
+    ```
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="Browse Datasets" icon="database" href="/datasets">
+    Explore all six datasets with full Parquet schemas.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/datasets">
+    Full REST API documentation with request/response examples.
+  </Card>
+  <Card title="Jupyter Example" icon="book" href="/examples/jupyter-quickstart">
+    Step-by-step notebook workflow with visualizations.
+  </Card>
+</CardGroup>

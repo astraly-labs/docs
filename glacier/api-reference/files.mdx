@@ -1,0 +1,80 @@
+---
+title: "List Files"
+description: "List Parquet files matching dataset, date range, and optional filters."
+---
+
+## Request
+
+<CodeGroup>
+```bash cURL
+curl -H "Authorization: Bearer glc_your_key" \
+  "https://data.pragma.build/v1/files?dataset=orderbooks&from=2026-03-01&to=2026-03-15"
+```
+```python Python
+from pragma_glacier import GlacierClient
+
+client = GlacierClient()
+files = client.list_files(
+    dataset="orderbooks",
+    start="2026-03-01",
+    end="2026-03-15",
+    source="HYPERLIQUID",
+    pair="BTC_USD"
+)
+print(f"{files.file_count} files, {files.total_size} bytes")
+```
+</CodeGroup>
+
+### Query Parameters
+
+| Parameter | Required | Type | Description |
+|-----------|----------|------|-------------|
+| `dataset` | Yes | string | Dataset topic: `prices`, `orderbooks`, `trades`, `funding_rates`, `open_interest`, `volumes` |
+| `from` | Yes | string | Start date in `YYYY-MM-DD` format |
+| `to` | Yes | string | End date in `YYYY-MM-DD` format (inclusive) |
+| `source` | No | string | Filter by data source (e.g., `HYPERLIQUID`, `EXTENDED`) |
+| `pair` | No | string | Filter by trading pair (e.g., `BTC_USD`, `ETH_USD`) |
+
+<Tip>
+  Use the [List Filters](/api-reference/filters) endpoint to discover available sources and pairs for a given dataset and date range.
+</Tip>
+
+## Response
+
+```json Response
+{
+  "files": [
+    {
+      "path": "archives/2026/3/1/orderbooks/HYPERLIQUID/BTC_USD.parquet",
+      "size": 1048576,
+      "date": "2026-03-01"
+    },
+    {
+      "path": "archives/2026/3/1/orderbooks/HYPERLIQUID/ETH_USD.parquet",
+      "size": 524288,
+      "date": "2026-03-01"
+    }
+  ],
+  "total_size": 1572864,
+  "file_count": 2
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `files` | array | List of matching file objects |
+| `files[].path` | string | File path — use with the [Download](/api-reference/download) endpoint |
+| `files[].size` | integer | File size in bytes |
+| `files[].date` | string | Date the file covers |
+| `total_size` | integer | Sum of all file sizes in bytes |
+| `file_count` | integer | Number of matching files |
+
+## Errors
+
+| Status | Description |
+|--------|-------------|
+| 400 | Missing required parameter or invalid date format |
+| 401 | Invalid or missing API key |
+| 403 | Dataset not available on your tier |

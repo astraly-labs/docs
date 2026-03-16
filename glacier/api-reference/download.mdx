@@ -1,0 +1,79 @@
+---
+title: "Download File"
+description: "Download a Parquet file by its path via a signed GCS URL."
+---
+
+## Request
+
+<CodeGroup>
+```bash cURL
+curl -L -H "Authorization: Bearer glc_your_key" \
+  "https://data.pragma.build/v1/download/archives/2026/3/15/orderbooks/EXTENDED/XAU_USD.parquet" \
+  -o XAU_USD.parquet
+```
+```python Python (single file)
+import httpx
+
+client = httpx.Client(
+    headers={"Authorization": "Bearer glc_your_key"},
+    follow_redirects=True
+)
+response = client.get(
+    "https://data.pragma.build/v1/download/archives/2026/3/15/orderbooks/EXTENDED/XAU_USD.parquet"
+)
+with open("XAU_USD.parquet", "wb") as f:
+    f.write(response.content)
+```
+</CodeGroup>
+
+<Note>
+  The endpoint returns a **302 redirect** to a signed GCS URL (valid for 15 minutes). Use the `-L` flag with cURL to follow redirects.
+</Note>
+
+### Path Parameters
+
+| Parameter | Required | Type | Description |
+|-----------|----------|------|-------------|
+| `path` | Yes | string | Full file path from the [List Files](/api-reference/files) response |
+
+The path must start with `archives/` and end with `.parquet`.
+
+## Batch Downloads with SDK
+
+For downloading multiple files, use the SDK which handles parallelism and progress:
+
+```python Python
+from pragma_glacier import GlacierClient
+
+client = GlacierClient()
+
+files = client.list_files(
+    dataset="orderbooks",
+    start="2026-03-01",
+    end="2026-03-15"
+)
+
+# Download all files with 4 parallel workers
+client.download(files, output_dir="./data", parallel=4)
+```
+
+Or use the CLI:
+
+```bash CLI
+glacier download \
+  --dataset orderbooks \
+  --from 2026-03-01 \
+  --to 2026-03-15 \
+  --source HYPERLIQUID \
+  -o ./data
+```
+
+## Errors
+
+| Status | Description |
+|--------|-------------|
+| 400 | Invalid path format |
+| 401 | Invalid or missing API key |
+| 403 | Dataset or source not available on your tier |
+| 404 | File not found |
+| 429 | Daily download limit exceeded |

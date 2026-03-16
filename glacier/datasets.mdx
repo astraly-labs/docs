@@ -1,0 +1,111 @@
+---
+title: "Datasets"
+description: "Full reference for all available Glacier datasets and their Parquet schemas."
+---
+
+Glacier serves six datasets, each stored as daily Parquet files partitioned by source and trading pair.
+
+## File Path Pattern
+
+```
+archives/{year}/{month}/{day}/{dataset_topic}/{source}/{pair}.parquet
+```
+
+Example: `archives/2026/3/15/orderbooks/HYPERLIQUID/BTC_USD.parquet`
+
+---
+
+## prices
+
+Aggregated price data from multiple sources.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `source` | string | Data provider (e.g., HYPERLIQUID, PRAGMA) |
+| `chain` | string | Blockchain network |
+| `pair` | string | Trading pair (e.g., BTC_USD) |
+| `timestamp_ms` | int64 | Unix timestamp in milliseconds |
+| `price` | float64 | Price value |
+| `volume` | float64 | Associated volume |
+
+<Tip>Available on the **Free** tier and above.</Tip>
+
+---
+
+## orderbooks
+
+L2 order book snapshots with full bid/ask depth.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `source` | string | Exchange source |
+| `pair` | string | Trading pair |
+| `timestamp_ms` | int64 | Unix timestamp in milliseconds |
+| `bids` | list | List of [price, size] bid levels |
+| `asks` | list | List of [price, size] ask levels |
+| `sequence` | int64 | Exchange sequence number |
+
+<Info>Available on the **Pro** tier and above.</Info>
+
+---
+
+## trades
+
+Individual trade executions from exchanges.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `source` | string | Exchange source |
+| `pair` | string | Trading pair |
+| `timestamp_ms` | int64 | Unix timestamp in milliseconds |
+| `price` | float64 | Execution price |
+| `size` | float64 | Trade size |
+| `side` | string | `"buy"` or `"sell"` |
+
+<Info>Available on the **Pro** tier and above.</Info>
+
+---
+
+## funding_rates
+
+Perpetual futures funding rate snapshots.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `source` | string | Exchange source |
+| `pair` | string | Trading pair |
+| `timestamp_ms` | int64 | Unix timestamp in milliseconds |
+| `rate` | float64 | Funding rate value |
+| `next_funding_time` | int64 | Next funding timestamp (ms) |
+
+<Info>Available on the **Pro** tier and above.</Info>
+
+---
+
+## open_interest
+
+Open interest data across exchanges.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `source` | string | Exchange source |
+| `pair` | string | Trading pair |
+| `timestamp_ms` | int64 | Unix timestamp in milliseconds |
+| `open_interest` | float64 | Open interest value |
+
+<Info>Available on the **Pro** tier and above.</Info>
+
+---
+
+## volumes
+
+Trading volume data across exchanges.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `source` | string | Exchange source |
+| `pair` | string | Trading pair |
+| `timestamp_ms` | int64 | Unix timestamp in milliseconds |
+| `volume` | float64 | Volume value |
+
+<Tip>Available on the **Free** tier and above.</Tip>

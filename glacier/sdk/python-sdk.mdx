@@ -1,0 +1,164 @@
+---
+title: "Python SDK"
+description: "Full reference for the pragma-glacier Python library."
+---
+
+## Installation
+
+<CodeGroup>
+```bash pip
+pip install pragma-glacier
+```
+```bash pip (with data extras)
+pip install pragma-glacier[data]
+```
+</CodeGroup>
+
+The `[data]` extra includes `polars` and `pyarrow` for loading Parquet files directly into DataFrames.
+
+## Quick Start
+
+```python Python
+from pragma_glacier import GlacierClient
+
+client = GlacierClient()  # uses GLACIER_API_KEY env var
+datasets = client.list_datasets()
+```
+
+## Client Initialization
+
+```python Python
+# From environment variable (GLACIER_API_KEY)
+client = GlacierClient()
+
+# Explicit API key
+client = GlacierClient(api_key="glc_your_key")
+
+# Custom base URL
+client = GlacierClient(base_url="https://data.pragma.build/v1")
+```
+
+The client also works as a context manager:
+
+```python Python
+with GlacierClient() as client:
+    datasets = client.list_datasets()
+```
+
+## Methods
+
+### `list_datasets()`
+
+Returns all available datasets for your tier.
+
+```python Python
+datasets = client.list_datasets()
+for ds in datasets:
+    print(f"{ds.name}: {ds.description}")
+    print(f"  Columns: {[c.name for c in ds.columns]}")
+```
+
+### `list_files(dataset, start, end, source=None, pair=None)`
+
+List Parquet files matching filters. Accepts both `str` and `date` objects for dates.
+
+```python Python
+from datetime import date
+
+files = client.list_files(
+    dataset="orderbooks",
+    start="2026-03-01",       # or date(2026, 3, 1)
+    end="2026-03-15",
+    source="HYPERLIQUID",     # optional
+    pair="BTC_USD"            # optional
+)
+
+print(f"Found {files.file_count} files")
+print(f"Total size: {files.total_size / 1e6:.1f} MB")
+```
+
+### `get_filters(dataset, start, end)`
+
+Get available sources and pairs for a dataset and date range.
+
+```python Python
+filters = client.get_filters(
+    dataset="trades",
+    start="2026-03-01",
+    end="2026-03-15"
+)
+print("Sources:", filters.sources)
+print("Pairs:", filters.pairs)
+```
+
+### `download(files, output_dir, parallel=4)`
+
+Download files to a local directory with parallel workers and a progress bar.
+
+```python Python
+files = client.list_files(dataset="trades", start="2026-03-01", end="2026-03-07")
+paths = client.download(files, output_dir="./data", parallel=4)
+# Creates: ./data/archives/2026/3/1/trades/HYPERLIQUID/BTC_USD.parquet
+```
+
+- Skips files that already exist with matching size
+- Retries failed downloads 3 times with exponential backoff
+- Shows a rich progress bar with transfer speed
+
+### `to_polars(dataset, start, end, source=None, pair=None)`
+
+Download and load data directly into a Polars DataFrame. Requires the `data` extra.
+
+```python Python
+df = client.to_polars(
+    dataset="trades",
+    start="2026-03-01",
+    end="2026-03-07",
+    source="HYPERLIQUID",
+    pair="BTC_USD"
+)
+print(df.head())
+print(df.schema)
+```
+
+### `to_arrow(dataset, start, end, source=None, pair=None)`
+
+Download and load data as a PyArrow Table. Requires the `data` extra.
+
+```python Python
+table = client.to_arrow(
+    dataset="prices",
+    start="2026-03-01",
+    end="2026-03-07"
+)
+print(table.schema)
+```
+
+## Error Handling
+
+```python Python
+from pragma_glacier import GlacierClient
+from pragma_glacier.client import GlacierError
+
+client = GlacierClient()
+
+try:
+    files = client.list_files(dataset="orderbooks", start="2026-03-01", end="2026-03-15")
+except GlacierError as e:
+    print(f"API error {e.status_code}: {e.message}")
+```
+
+| Status Code | Meaning |
+|-------------|---------|
+| 401 | Invalid or missing API key |
+| 403 | Dataset/source not available on your tier |
+| 429 | Rate limit exceeded |
+
+## Models
+
+The SDK uses Pydantic models for type-safe responses:
+
+- `Dataset` — name, description, columns
+- `FileEntry` — path, size, date
+- `FilesResponse` — files, total_size, file_count
+- `FiltersResponse` — sources, pairs

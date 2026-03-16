@@ -1,0 +1,77 @@
+---
+title: "Authentication"
+description: "How to authenticate with the Pragma Glacier API."
+---
+
+All API requests require a valid API key. Get yours at [data.pragma.build/signup](https://data.pragma.build/signup).
+
+## API Key Format
+
+Keys follow the format `glc_<32_hex_chars>`. Example: `glc_a1b2c3d4e5f6...`.
+
+## HTTP Header
+
+Pass your key in the `Authorization` header as a Bearer token:
+
+<CodeGroup>
+```bash cURL
+curl -H "Authorization: Bearer glc_your_key_here" \
+  https://data.pragma.build/v1/datasets
+```
+```python Python
+from pragma_glacier import GlacierClient
+
+client = GlacierClient(api_key="glc_your_key_here")
+```
+```javascript JavaScript
+const response = await fetch('https://data.pragma.build/v1/datasets', {
+  headers: {
+    'Authorization': 'Bearer glc_your_key_here'
+  }
+});
+```
+</CodeGroup>
+
+## Configuration Methods
+
+The SDK resolves your API key in this order:
+
+<Steps>
+  <Step title="Explicit Parameter">
+    Pass the key directly when creating a client:
+    ```python Python
+    client = GlacierClient(api_key="glc_your_key_here")
+    ```
+  </Step>
+  <Step title="Environment Variable">
+    Set `GLACIER_API_KEY`:
+    ```bash
+    export GLACIER_API_KEY="glc_your_key_here"
+    ```
+    ```python Python
+    # Automatically uses GLACIER_API_KEY
+    client = GlacierClient()
+    ```
+  </Step>
+  <Step title="Config File">
+    Store credentials in `~/.pragma/config.toml`:
+    ```bash
+    glacier auth login
+    # Prompts for your API key and saves it locally
+    ```
+    ```toml ~/.pragma/config.toml
+    [glacier]
+    api_key = "glc_your_key_here"
+    ```
+  </Step>
+</Steps>
+
+## Security Best Practices
+
+<Warning>
+  Never commit API keys to version control. Use environment variables or secret managers in production.
+</Warning>
+
+- Rotate keys regularly via the [dashboard](https://data.pragma.build).
+- Use separate keys for development and production.
+- Each key is tied to a billing tier — keep track of which key maps to which tier.

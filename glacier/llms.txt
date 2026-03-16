@@ -1,0 +1,111 @@
+# Pragma Glacier API — LLM Reference
+
+> Historical financial data API for AI/ML research.
+> Base URL: https://data.pragma.build/v1
+
+## Authentication
+All API requests require an API key in the Authorization header:
+Authorization: Bearer glc_<your_key>
+
+Get an API key at https://data.pragma.build
+
+## Endpoints
+
+### GET /v1/datasets
+List all available datasets.
+
+Response: [{ name, description, columns: [{ name, data_type }] }]
+
+### GET /v1/files
+List Parquet files matching filters.
+
+Query params:
+- dataset (required): prices, orderbooks, trades, funding_rates, open_interest, volumes
+- from (required): Start date (YYYY-MM-DD)
+- to (required): End date (YYYY-MM-DD)
+- source (optional): Exchange/source filter (e.g., HYPERLIQUID, EXTENDED, PRAGMA)
+- pair (optional): Trading pair filter (e.g., BTC_USD, ETH_USD)
+
+Response: { files: [{ path, dataset, source, pair, date, size }], total_size, file_count }
+
+### GET /v1/filters
+Get available sources and pairs for a dataset/date range.
+
+Query params:
+- dataset (required)
+- from (required)
+- to (required)
+
+Response: { sources: [string], pairs: [string] }
+
+### GET /v1/download/{path}
+Download a Parquet file. Returns 302 redirect to a signed GCS URL (15 min expiry).
+
+Path example: archives/2026/3/15/orderbooks/EXTENDED/XAU_USD.parquet
+
+## Datasets
+
+### prices
+Description: Aggregated price data from multiple sources
+Columns: source (string), chain (string), pair (string), timestamp_ms (int64), price (float64), volume (float64)
+
+### orderbooks
+Description: L2 order book snapshots
+Columns: source (string), pair (string), timestamp_ms (int64), bids (list), asks (list), sequence (int64)
+
+### trades
+Description: Individual trade executions
+Columns: source (string), pair (string), timestamp_ms (int64), price (float64), size (float64), side (string)
+
+### funding_rates
+Description: Perpetual futures funding rates
+Columns: source (string), pair (string), timestamp_ms (int64), rate (float64), next_funding_time (int64)
+
+### open_interest
+Description: Open interest data
+Columns: source (string), pair (string), timestamp_ms (int64), open_interest (float64)
+
+### volumes
+Description: Volume data
+Columns: source (string), pair (string), timestamp_ms (int64), volume (float64)
+
+## File Path Pattern
+archives/{year}/{month}/{day}/{dataset}/{source}/{pair}.parquet
+Example: archives/2026/3/15/orderbooks/HYPERLIQUID/BTC_USD.parquet
+
+## Python SDK
+pip install pragma-glacier
+
+```python
+from pragma_glacier import GlacierClient
+
+client = GlacierClient()  # uses GLACIER_API_KEY env var
+datasets = client.list_datasets()
+files = client.list_files(dataset="orderbooks", start="2026-03-01", end="2026-03-15")
+client.download(files, output_dir="./data", parallel=4)
+df = client.to_polars(dataset="trades", start="2026-03-01", end="2026-03-15")
+```
+
+## CLI
+```bash
+pip install pragma-glacier
+glacier auth login
+glacier datasets
+glacier files --dataset orderbooks --from 2026-03-01 --to 2026-03-15
+glacier download --dataset orderbooks --from 2026-03-01 --to 2026-03-15 -o ./data
+```
+
+## Tiers
+| | Free | Pro ($99/mo) | Enterprise |
+|--|------|-------------|------------|
+| Datasets | prices, volumes | All 6 | All 6 |
+| History | 30 days | Full | Full |
+| Sources | HYPERLIQUID | All | All |
+| Rate limit | 60/min | 600/min | 6000/min |
+| Download | 5 GB/day | 100 GB/day | Unlimited |
+
+## Errors
+All errors return JSON: { "error": "message", "code": "ERROR_CODE" }
+- 401: Invalid or missing API key
+- 403: Tier restriction (dataset, date range, or source not allowed)
+- 429: Rate limit exceeded (check Retry-After header)

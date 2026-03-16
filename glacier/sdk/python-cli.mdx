@@ -1,0 +1,121 @@
+---
+title: "CLI Reference"
+description: "Command-line interface for Pragma Glacier."
+---
+
+## Installation
+
+```bash
+pip install pragma-glacier
+```
+
+The `glacier` CLI is installed alongside the Python SDK.
+
+## Authentication
+
+### Login
+
+```bash
+glacier auth login
+```
+
+Prompts for your API key and stores it in `~/.pragma/config.toml`.
+
+### Check Status
+
+```bash
+glacier auth status
+```
+
+Shows whether you are authenticated and your key prefix.
+
+### Environment Variable
+
+```bash
+export GLACIER_API_KEY="glc_your_key"
+```
+
+## Commands
+
+### `glacier datasets`
+
+List all available datasets.
+
+```bash
+$ glacier datasets
+
+  Glacier Datasets
+  ┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
+  ┃ Name           ┃ Description                        ┃ Columns ┃
+  ┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
+  │ prices         │ Price data from multiple sources    │       6 │
+  │ orderbooks     │ L2 order book snapshots             │       6 │
+  │ trades         │ Individual trade executions         │       6 │
+  │ funding_rates  │ Perpetual funding rate snapshots    │       5 │
+  │ open_interest  │ Open interest across exchanges      │       4 │
+  │ volumes        │ Trading volume data                 │       4 │
+  └────────────────┴────────────────────────────────────┴─────────┘
+```
+
+### `glacier files`
+
+List available files for a dataset and date range.
+
+```bash
+glacier files --dataset orderbooks --from 2026-03-01 --to 2026-03-15
+```
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--dataset` | Yes | Dataset topic |
+| `--from` | Yes | Start date (YYYY-MM-DD) |
+| `--to` | Yes | End date (YYYY-MM-DD) |
+| `--source` | No | Filter by source |
+| `--pair` | No | Filter by pair |
+
+Example output:
+
+```bash
+$ glacier files --dataset trades --from 2026-03-01 --to 2026-03-03 --source HYPERLIQUID
+
+  Files - trades
+  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━┓
+  ┃ Path                                                 ┃ Source      ┃ Pair    ┃ Date       ┃   Size ┃
+  ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━┩
+  │ archives/2026/3/1/trades/HYPERLIQUID/BTC_USD.parquet  │ HYPERLIQUID │ BTC_USD │ 2026-03-01 │ 1.2 MB │
+  │ archives/2026/3/1/trades/HYPERLIQUID/ETH_USD.parquet  │ HYPERLIQUID │ ETH_USD │ 2026-03-01 │ 890 KB │
+  └──────────────────────────────────────────────────────┴─────────────┴─────────┴────────────┴────────┘
+
+  42 files, 38.5 MB total
+```
+
+### `glacier download`
+
+Download files to a local directory.
+
+```bash
+glacier download --dataset orderbooks --from 2026-03-01 --to 2026-03-15 -o ./data
+```
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--dataset` | Yes | Dataset topic |
+| `--from` | Yes | Start date |
+| `--to` | Yes | End date |
+| `-o`, `--output` | No | Output directory (default: `./data`) |
+| `--source` | No | Filter by source |
+| `--pair` | No | Filter by pair |
+| `--parallel` | No | Number of parallel downloads (default: 4) |
+
+Example:
+
+```bash
+$ glacier download --dataset trades --from 2026-03-01 --to 2026-03-07 -o ./data --parallel 8
+
+Downloading 84 files (192.3 MB)...
+
+Overall           ━━━━━━━━━━━━━━━━━━━━━━━━━ 100.0%  84/84 files
+BTC_USD.parquet   ━━━━━━━━━━━━━━━━━━━━━━━━━ 100.0%  1.2 MB  2.4 MB/s
+
+Done! 84 files saved to ./data
+```

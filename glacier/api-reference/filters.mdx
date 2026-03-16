@@ -1,0 +1,60 @@
+---
+title: "List Filters"
+description: "Get available sources and trading pairs for a dataset and date range."
+---
+
+## Request
+
+<CodeGroup>
+```bash cURL
+curl -H "Authorization: Bearer glc_your_key" \
+  "https://data.pragma.build/v1/filters?dataset=orderbooks&from=2026-03-01&to=2026-03-15"
+```
+```python Python
+from pragma_glacier import GlacierClient
+
+client = GlacierClient()
+filters = client.get_filters(
+    dataset="orderbooks",
+    start="2026-03-01",
+    end="2026-03-15"
+)
+print("Sources:", filters.sources)
+print("Pairs:", filters.pairs)
+```
+</CodeGroup>
+
+### Query Parameters
+
+| Parameter | Required | Type | Description |
+|-----------|----------|------|-------------|
+| `dataset` | Yes | string | Dataset topic |
+| `from` | Yes | string | Start date (`YYYY-MM-DD`) |
+| `to` | Yes | string | End date (`YYYY-MM-DD`) |
+
+## Response
+
+```json Response
+{
+  "sources": ["EXTENDED", "HYPERLIQUID", "PRAGMA"],
+  "pairs": ["BTC_USD", "ETH_USD", "SOL_USD", "XAU_USD"]
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `sources` | string[] | Available data sources in the date range |
+| `pairs` | string[] | Available trading pairs in the date range |
+
+<Tip>
+  Use these values to refine your [List Files](/api-reference/files) queries with the `source` and `pair` parameters.
+</Tip>
+
+## Errors
+
+| Status | Description |
+|--------|-------------|
+| 400 | Missing required parameter or invalid date format |
+| 401 | Invalid or missing API key |

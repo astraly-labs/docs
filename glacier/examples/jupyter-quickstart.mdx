@@ -1,0 +1,109 @@
+---
+title: "Jupyter Quickstart"
+description: "Step-by-step notebook workflow: install, authenticate, download, and analyze."
+---
+
+This guide walks you through a complete Jupyter notebook workflow with Glacier data.
+
+## Setup
+
+Install the SDK and analysis libraries in a notebook cell:
+
+```python Python
+!pip install pragma-glacier[data] matplotlib
+```
+
+## Authenticate
+
+```python Python
+import os
+os.environ["GLACIER_API_KEY"] = "glc_your_key_here"
+
+from pragma_glacier import GlacierClient
+client = GlacierClient()
+```
+
+## Explore Datasets
+
+```python Python
+datasets = client.list_datasets()
+for ds in datasets:
+    print(f"{ds.name:20s} {ds.description}")
+```
+
+## Check Available Data
+
+```python Python
+filters = client.get_filters(
+    dataset="trades",
+    start="2026-03-01",
+    end="2026-03-07"
+)
+print("Sources:", filters.sources)
+print("Pairs:", filters.pairs)
+```
+
+## Load into Polars
+
+```python Python
+import polars as pl
+
+df = client.to_polars(
+    dataset="trades",
+    start="2026-03-01",
+    end="2026-03-07",
+    source="HYPERLIQUID",
+    pair="BTC_USD"
+)
+df.head(10)
+```
+
+## Basic Analysis
+
+### Price over time
+
+```python Python
+import matplotlib.pyplot as plt
+
+df_sorted = df.sort("timestamp_ms")
+
+plt.figure(figsize=(14, 5))
+plt.plot(df_sorted["timestamp_ms"], df_sorted["price"], linewidth=0.5)
+plt.title("BTC/USD Trade Prices - March 1-7, 2026")
+plt.xlabel("Timestamp (ms)")
+plt.ylabel("Price (USD)")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
+
+### Volume distribution by side
+
+```python Python
+volume_by_side = df.group_by("side").agg(
+    pl.col("size").sum().alias("total_volume"),
+    pl.col("size").count().alias("trade_count"),
+)
+print(volume_by_side)
+```
+
+### Hourly VWAP
+
+```python Python
+df_with_hour = df.with_columns(
+    (pl.col("timestamp_ms") // 3_600_000).alias("hour_bucket")
+)
+
+vwap = df_with_hour.group_by("hour_bucket").agg(
+    (pl.col("price") * pl.col("size")).sum() / pl.col("size").sum()
+).sort("hour_bucket")
+
+plt.figure(figsize=(14, 5))
+plt.plot(vwap["hour_bucket"], vwap["price"], marker="o", markersize=3)
+plt.title("Hourly VWAP - BTC/USD")
+plt.xlabel("Hour Bucket")
+plt.ylabel("VWAP (USD)")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```

@@ -1,0 +1,118 @@
+---
+mode: "custom"
+---
+export function openSearch() {
+  document.getElementById('search-bar-entry').click();
+}
+
+<div className="hero-section">
+  <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+    <div className="text-center ">
+      <h1 className="text-6xl pt-10 tracking-tight pb-10 text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
+        Pragma Glacier
+      </h1>
+      <h2 className="text-xl tracking-tight pb-4 text-gray-900 dark:text-white">
+        Historical financial data for AI research, delivered as Parquet files via API.
+      </h2>
+      <div className="pb-8 max-w-2xl mx-auto">
+      <div className="flex max-w-2xl items-center justify-center mx-auto" style={{ maxWidth: '500px' }}>
+    <button
+      type="button"
+      className="hidden w-full lg:flex items-center text-sm leading-6 rounded-full py-2 pl-3 pr-3 shadow-sm text-gray-400 dark:text-white/50 bg-background-light dark:bg-background-dark dark:brightness-[1.1] dark:ring-1 dark:hover:brightness-[1.25] ring-1 ring-gray-400/20 hover:ring-gray-600/25 dark:ring-gray-600/30 dark:hover:ring-gray-500/30 focus:outline-primary"
+      id="home-search-entry"
+      style={{
+        marginTop: '2rem',
+        maxWidth: '100rem',
+        width: '90%',
+        margin: '2rem auto 0'
+      }}
+      onClick={openSearch}
+    >
+      <svg
+        className="h-4 w-4 ml-1.5 flex-none bg-primary-light hover:bg-gray-600 dark:bg-white/50 dark:hover:bg-white/70"
+        style={{
+          marginRight: '0.5rem',
+         maskImage:
+           'url("https://mintlify.b-cdn.net/v6.5.1/solid/magnifying-glass.svg")',
+         maskRepeat: 'no-repeat',
+         maskPosition: 'center center',
+        }}
+      />
+
+      Search datasets, API docs, SDK...
+    </button>
+    </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="mx-auto justify-center items-center w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+
+<div className="text-2xl font-bold text-center pb-8">Get started with Glacier data</div>
+<div className="max-w-5xl mx-auto">
+<CardGroup cols={3}>
+  <Card
+    title="Quick Start"
+    icon="play"
+    href="/getting-started"
+  >
+    Install the SDK, authenticate, and download your first dataset in under 5 minutes.
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/datasets"
+  >
+    Browse endpoints for listing datasets, querying files, and downloading Parquet data.
+  </Card>
+  <Card
+    title="Browse Datasets"
+    icon="database"
+    href="/datasets"
+  >
+    Explore the six available datasets with full Parquet schemas.
+  </Card>
+</CardGroup>
+
+<div className="mt-24">
+  <h3 className="text-xl font-bold text-center py-8">What is Glacier?</h3>
+  <div className="max-w-3xl mx-auto text-center pb-8">
+    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+      Glacier is Pragma's historical data archive. It continuously ingests market data from Kafka — orderbooks, trades, funding rates, prices, volumes, and open interest — and stores it as partitioned Parquet files on Google Cloud Storage. The Glacier API provides authenticated, tier-gated access to this archive via a REST API, Python SDK, and CLI.
+    </p>
+  </div>
+</div>
+
+<div className="mt-12 pb-24">
+  <h3 className="text-xl font-bold text-center pb-6">Key Features</h3>
+  <CardGroup cols={2}>
+    <Card
+      title="Six Datasets"
+      icon="database"
+    >
+      Prices, orderbooks, trades, funding rates, open interest, and volumes — all in columnar Parquet format.
+    </Card>
+    <Card
+      title="Python SDK & CLI"
+      icon="python"
+    >
+      First-class Python client with parallel downloads, Polars/PyArrow integration, and a rich CLI.
+    </Card>
+    <Card
+      title="Signed URL Downloads"
+      icon="download"
+    >
+      Files are served via GCS signed URLs for maximum throughput — no proxy bottleneck.
+    </Card>
+    <Card
+      title="Tiered Access"
+      icon="layer-group"
+    >
+      Free tier for exploration, Pro for full access, Enterprise for unlimited scale.
+    </Card>
+  </CardGroup>
+</div>
+
+</div>
+</div>

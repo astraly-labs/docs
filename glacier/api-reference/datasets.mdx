@@ -1,0 +1,78 @@
+---
+title: "List Datasets"
+description: "Returns all available datasets with their schemas."
+---
+
+## Request
+
+<CodeGroup>
+```bash cURL
+curl -H "Authorization: Bearer glc_your_key" \
+  https://data.pragma.build/v1/datasets
+```
+```python Python
+from pragma_glacier import GlacierClient
+
+client = GlacierClient()
+datasets = client.list_datasets()
+for ds in datasets:
+    print(f"{ds.name}: {ds.description}")
+```
+</CodeGroup>
+
+No query parameters required.
+
+## Response
+
+Returns an array of dataset objects.
+
+```json Response
+[
+  {
+    "id": "prices",
+    "name": "Prices",
+    "topic": "prices",
+    "description": "Price data from multiple sources",
+    "columns": ["source", "chain", "pair", "timestamp_ms", "price", "volume"]
+  },
+  {
+    "id": "orderbook",
+    "name": "Order Book",
+    "topic": "orderbooks",
+    "description": "L2 order book snapshots",
+    "columns": ["source", "pair", "timestamp_ms", "bids", "asks", "sequence"]
+  },
+  {
+    "id": "trades",
+    "name": "Trades",
+    "topic": "trades",
+    "description": "Individual trade executions",
+    "columns": ["source", "pair", "timestamp_ms", "price", "size", "side"]
+  },
+  {
+    "id": "funding",
+    "name": "Funding Rates",
+    "topic": "funding_rates",
+    "description": "Perpetual funding rate snapshots",
+    "columns": ["source", "pair", "timestamp_ms", "rate", "next_funding_time"]
+  },
+  {
+    "id": "open-interest",
+    "name": "Open Interest",
+    "topic": "open_interest",
+    "description": "Open interest snapshots across exchanges",
+    "columns": ["source", "pair", "timestamp_ms", "open_interest"]
+  },
+  {
+    "id": "volumes",
+    "name": "Volumes",
+    "topic": "volumes",
+    "description": "Trading volume data across exchanges",
+    "columns": ["source", "pair", "timestamp_ms", "volume"]
+  }
+]
+```
+
+<Note>
+  Datasets returned are filtered by your API key's tier. Free tier keys only see `prices` and `volumes`.
+</Note>

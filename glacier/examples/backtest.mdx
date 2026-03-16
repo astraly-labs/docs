@@ -1,0 +1,139 @@
+---
+title: "Simple Backtest"
+description: "Use Glacier trades data to backtest a basic SMA crossover strategy."
+---
+
+This example shows how to download historical trades and run a simple moving-average crossover backtest.
+
+## Setup
+
+```python Python
+!pip install pragma-glacier[data] matplotlib
+```
+
+```python Python
+import polars as pl
+import matplotlib.pyplot as plt
+from pragma_glacier import GlacierClient
+
+client = GlacierClient()
+```
+
+## Download Trades
+
+```python Python
+df = client.to_polars(
+    dataset="trades",
+    start="2026-02-01",
+    end="2026-02-28",
+    source="HYPERLIQUID",
+    pair="ETH_USD"
+)
+print(f"Loaded {len(df)} trades")
+```
+
+## Resample to 1-minute OHLCV bars
+
+```python Python
+df = df.sort("timestamp_ms")
+
+bars = df.with_columns(
+    (pl.col("timestamp_ms") // 60_000).alias("minute")
+).group_by("minute").agg(
+    pl.col("price").first().alias("open"),
+    pl.col("price").max().alias("high"),
+    pl.col("price").min().alias("low"),
+    pl.col("price").last().alias("close"),
+    pl.col("size").sum().alias("volume"),
+).sort("minute")
+
+print(f"{len(bars)} bars")
+bars.head()
+```
+
+## Compute Moving Averages
+
+```python Python
+bars = bars.with_columns(
+    pl.col("close").rolling_mean(window_size=20).alias("sma_20"),
+    pl.col("close").rolling_mean(window_size=50).alias("sma_50"),
+)
+```
+
+## Generate Signals
+
+Buy when `sma_20` crosses above `sma_50`, sell when it crosses below.
+
+```python Python
+bars = bars.with_columns(
+    pl.when(
+        (pl.col("sma_20") > pl.col("sma_50"))
+        & (pl.col("sma_20").shift(1) <= pl.col("sma_50").shift(1))
+    ).then(pl.lit(1))
+    .when(
+        (pl.col("sma_20") < pl.col("sma_50"))
+        & (pl.col("sma_20").shift(1) >= pl.col("sma_50").shift(1))
+    ).then(pl.lit(-1))
+    .otherwise(pl.lit(0))
+    .alias("signal")
+)
+
+signals = bars.filter(pl.col("signal") != 0)
+print(f"Total signals: {len(signals)}")
+print(f"  Buys: {len(signals.filter(pl.col('signal') == 1))}")
+print(f"  Sells: {len(signals.filter(pl.col('signal') == -1))}")
+```
+
+## Simulate P&L
+
+```python Python
+position = 0.0
+entry_price = 0.0
+pnl = []
+equity = [0.0]
+
+for row in signals.iter_rows(named=True):
+    if row["signal"] == 1 and position == 0:
+        position = 1.0
+        entry_price = row["close"]
+    elif row["signal"] == -1 and position == 1.0:
+        trade_pnl = row["close"] - entry_price
+        pnl.append(trade_pnl)
+        equity.append(equity[-1] + trade_pnl)
+        position = 0.0
+
+print(f"Trades: {len(pnl)}")
+print(f"Total PnL: {sum(pnl):.2f}")
+print(f"Win rate: {sum(1 for p in pnl if p > 0) / max(len(pnl), 1) * 100:.1f}%")
+print(f"Avg trade: {sum(pnl) / max(len(pnl), 1):.2f}")
+```
+
+## Plot Results
+
+```python Python
+fig, axes = plt.subplots(2, 1, figsize=(14, 8), gridspec_kw={"height_ratios": [3, 1]})
+
+# Price + MAs
+axes[0].plot(bars["minute"], bars["close"], linewidth=0.5, label="Close", alpha=0.7)
+axes[0].plot(bars["minute"], bars["sma_20"], linewidth=1, label="SMA 20")
+axes[0].plot(bars["minute"], bars["sma_50"], linewidth=1, label="SMA 50")
+
+buys = signals.filter(pl.col("signal") == 1)
+sells = signals.filter(pl.col("signal") == -1)
+axes[0].scatter(buys["minute"], buys["close"], marker="^", color="green", s=40, label="Buy")
+axes[0].scatter(sells["minute"], sells["close"], marker="v", color="red", s=40, label="Sell")
+
+axes[0].set_title("ETH/USD - SMA Crossover Strategy")
+axes[0].legend()
+axes[0].grid(True, alpha=0.3)
+
+# Equity curve
+axes[1].plot(range(len(equity)), equity, color="blue")
+axes[1].set_title("Equity Curve")
+axes[1].set_xlabel("Trade #")
+axes[1].set_ylabel("Cumulative PnL (USD)")
+axes[1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
