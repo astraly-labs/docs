@@ -6,9 +6,10 @@
 - NEVER lie, guess, or make up information
 
 ## Monorepo Structure
-This repository contains two separate Mintlify documentation projects:
+This repository contains three separate Mintlify documentation projects:
 - **`/pragma`**: Pragma Oracle documentation
 - **`/0d-finance`**: 0D Finance documentation
+- **`/glacier`**: Pragma Glacier data-as-a-service documentation
 
 Each subdirectory has its own `docs.json`, content files, and assets. When working on documentation:
 - Identify which documentation you're working on (Pragma or 0D Finance)
