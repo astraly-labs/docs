@@ -40,19 +40,23 @@ Pragma Miden is built directly on top of this model: publishers write prices to 
   </Step>
 </Steps>
 
+## Live oracle
+
+The Pragma-owned oracle is running on Miden testnet, fed by the same `pragma-sdk` price-pusher we use for Starknet. You can browse live medians at **[miden.pragma.build](https://miden.pragma.build)**.
+
 ## Asset IDs (faucet_id)
 
 Pragma Miden identifies assets with a `prefix:suffix` format, corresponding to the `[prefix, suffix, 0, 0]` word pushed onto the Miden stack:
 
-| faucet_id | Asset    |
-|-----------|----------|
-| `1:0`     | BTC/USD  |
-| `2:0`     | ETH/USD  |
-| `3:0`     | SOL/USD  |
-| `4:0`     | BNB/USD  |
-| `5:0`     | XRP/USD  |
-| `6:0`     | HYPE/USD |
-| `7:0`     | POL/USD  |
+| faucet_id | Asset     |
+|-----------|-----------|
+| `1:0`     | BTC/USD   |
+| `2:0`     | ETH/USD   |
+| `3:0`     | WBTC/USD  |
+| `4:0`     | USDT/USD  |
+| `5:0`     | DAI/USD   |
+
+More pairs will be added as `pragma-sdk`'s `STARKNET_PAIR_TO_MIDEN_FAUCET` mapping grows.
 
 ## Deployments
 

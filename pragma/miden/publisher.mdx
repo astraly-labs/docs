@@ -3,9 +3,9 @@ title: Publish Prices
 description: "Become a Pragma Miden publisher and push price data on-chain"
 ---
 
-<Warning>
-  **Work in progress** — This integration is under active development. The API described here reflects the target state, not the current release. Reach out on [Telegram](https://t.me/pragma_oracle) if you want early access.
-</Warning>
+<Note>
+  Miden publishing ships as a **pre-release** of `pragma-sdk` (`2.13.0aN`). Once it's soaked stable in production, it will be promoted to `2.13.0` and `pip install pragma-sdk` will pick it up by default.
+</Note>
 
 Publishers submit price data directly to their own Miden account. The Oracle reads from all registered publishers when computing the median.
 
@@ -16,10 +16,10 @@ If you are already publishing on Starknet via `pragma-sdk`, adding Miden support
 ## Step 1 — Install
 
 ```bash
-pip install pragma-sdk
+pip install --pre 'pragma-sdk[miden]'
 ```
 
-`pragma-sdk` includes `pm-publisher` as a dependency. No Rust toolchain required.
+The `[miden]` extra pulls in `pm-publisher`, the Rust-backed Python wheel that drives the Miden client. No Rust toolchain required.
 
 ---
 
@@ -83,10 +83,11 @@ from pragma_sdk.miden.client import PragmaMidenClient, MidenEntry
 
 async def main():
     client = PragmaMidenClient(network="testnet")
+    await client.initialize()
 
     entries = [
-        MidenEntry(pair="1:0", price=85_000_000_000, decimals=6),  # BTC/USD = $85,000
-        MidenEntry(pair="2:0", price=2_200_000_000,  decimals=6),  # ETH/USD = $2,200
+        MidenEntry(pair="1:0", price=8_500_000_000_000, decimals=8),  # BTC/USD = $85,000.00
+        MidenEntry(pair="2:0", price=220_000_000_000,   decimals=8),  # ETH/USD = $2,200.00
     ]
 
     results = await client.publish_entries(entries)
@@ -95,43 +96,44 @@ async def main():
 asyncio.run(main())
 ```
 
-`publish_entries` is lazy — it reuses existing credentials without calling `initialize()` again. A failure on one entry does not abort the others.
+`publish_entries` submits a single batched Miden transaction containing all entries, regardless of how many pairs you push. A failure aborts the batch (atomic), but the next tick retries naturally.
+
+When converting from a `pragma-sdk` Starknet `Entry`, use `MidenEntry.from_starknet_entry(entry)` — it resolves `decimals` from the pair's currencies (`min(base.decimals, quote.decimals)`), so you never have to hardcode them.
 
 ---
 
-## Starknet + Miden together
+## Starknet + Miden together (`price-pusher`)
 
-If you already run a Starknet publisher, Miden publishing hooks into the same loop with no extra configuration:
+If you run the `price-pusher`, Miden publishing hooks into the existing loop with one extra flag. Each successful Starknet push triggers a fire-and-forget Miden publish in a worker thread — a hung or slow Miden node never affects Starknet.
 
-```python
-from pragma_sdk.client import PragmaClient
-from pragma_sdk.miden.client import PragmaMidenClient, MidenEntry
-
-starknet = PragmaClient(...)
-miden    = PragmaMidenClient(network="testnet")
-
-# Same price data, two networks
-price = fetch_btc_price()
-
-await starknet.publish_entries([...])
-await miden.publish_entries([MidenEntry(pair="1:0", price=price, decimals=6)])
+```bash
+price-pusher \
+  --config-file config.yaml \
+  --network mainnet \
+  --private-key plain:0x... \
+  --publisher-name MY_PUBLISHER \
+  --publisher-address 0x... \
+  --miden-network testnet \
+  --miden-config-path /path/to/pragma_miden.json \
+  --miden-storage-path /path/to/miden_storage \
+  --miden-keystore-path /path/to/keystore
 ```
+
+The pusher dedupes Starknet entries by pair using the **median** of source prices before forwarding to Miden, so a tick with `BTC/USD × 5 sources` produces a single `BTC/USD` entry on Miden.
 
 ---
 
 ## Available pairs
 
-| faucet_id | Asset    |
-|-----------|----------|
-| `1:0`     | BTC/USD  |
-| `2:0`     | ETH/USD  |
-| `3:0`     | SOL/USD  |
-| `4:0`     | BNB/USD  |
-| `5:0`     | XRP/USD  |
-| `6:0`     | HYPE/USD |
-| `7:0`     | POL/USD  |
+| faucet_id | Asset     | decimals |
+|-----------|-----------|----------|
+| `1:0`     | BTC/USD   | 8        |
+| `2:0`     | ETH/USD   | 8        |
+| `3:0`     | WBTC/USD  | 8        |
+| `4:0`     | USDT/USD  | 6        |
+| `5:0`     | DAI/USD   | 8        |
 
-Prices use **6 decimal places** — multiply the USD value by `1_000_000`.
+The pusher resolves decimals dynamically from each pair's currencies (`min(base.decimals, quote.decimals)`); you don't have to hardcode them. To add a pair, extend `STARKNET_PAIR_TO_MIDEN_FAUCET` in `pragma_sdk/miden/client.py` and make sure both currencies are in `supported_assets.yaml`.
 
 ---
 
@@ -141,15 +143,16 @@ Prices use **6 decimal places** — multiply the USD value by `1_000_000`.
 class PragmaMidenClient:
     def __init__(
         self,
-        network: str = "testnet",        # "testnet" | "devnet" | "local"
-        oracle_id: str | None = None,    # read from pragma_miden.json if omitted
-        storage_path: str | None = None, # CWD by default
+        network: str = "testnet",                 # "testnet" | "devnet" | "local"
+        oracle_id: str | None = None,             # read from pragma_miden.json if omitted
+        storage_path: str | None = None,
         keystore_path: str | None = None,
+        config_path: str | Path | None = None,    # path to pragma_miden.json
     ): ...
 
-    async def initialize(self) -> None: ...
+    async def initialize(self) -> None: ...                                  # idempotent
     async def publish_entries(self, entries: list[MidenEntry]) -> list[bool]: ...
-    async def get_entry(self, pair: str) -> str | None: ...
+    async def get_entry(self, pair: str) -> MidenEntry | None: ...           # None on failure
     async def sync(self) -> None: ...
 
 class MidenEntry:
@@ -157,4 +160,9 @@ class MidenEntry:
     price: int      # integer scaled by 10**decimals
     decimals: int
     timestamp: int  # unix timestamp, defaults to now
+
+    @classmethod
+    def from_starknet_entry(cls, entry) -> MidenEntry | None:
+        """Convert a Starknet Entry. Returns None if the pair is unsupported on Miden
+        or if its decimals cannot be resolved."""
 ```
