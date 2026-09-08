@@ -4,7 +4,7 @@ description: "Become a Pragma Miden publisher and push price data on-chain"
 ---
 
 <Note>
-  Miden publishing ships as a **pre-release** of `pragma-sdk` (`2.13.0aN`). Once it's soaked stable in production, it will be promoted to `2.13.0` and `pip install pragma-sdk` will pick it up by default.
+  Miden publishing is part of the stable `pragma-sdk` release (`2.14.2` or later) behind the `[miden]` extra.
 </Note>
 
 Publishers submit price data directly to their own Miden account. The Oracle reads from all registered publishers when computing the median.
@@ -16,7 +16,7 @@ If you are already publishing on Starknet via `pragma-sdk`, adding Miden support
 ## Step 1 — Install
 
 ```bash
-pip install --pre 'pragma-sdk[miden]'
+pip install 'pragma-sdk[miden]'
 ```
 
 The `[miden]` extra pulls in `pm-publisher`, the Rust-backed Python wheel that drives the Miden client. No Rust toolchain required.
@@ -104,7 +104,7 @@ When converting from a `pragma-sdk` Starknet `Entry`, use `MidenEntry.from_stark
 
 ## Starknet + Miden together (`price-pusher`)
 
-If you run the `price-pusher`, Miden publishing hooks into the existing loop with one extra flag. Each successful Starknet push triggers a fire-and-forget Miden publish in a worker thread — a hung or slow Miden node never affects Starknet.
+If you run the `price-pusher`, Miden publishing is enabled with one extra flag. It runs as its **own loop**, decoupled from the Starknet push cadence: every `--miden-publish-interval` seconds (default `3`) the latest polled prices are published to Miden in one batched transaction, whether or not Starknet pushed anything. Miden calls are offloaded to a thread with per-call timeouts, so a hung or slow Miden node never affects Starknet, and a Starknet outage (out of gas, RPC down) never stops the Miden feed.
 
 ```bash
 price-pusher \
@@ -114,12 +114,15 @@ price-pusher \
   --publisher-name MY_PUBLISHER \
   --publisher-address 0x... \
   --miden-network testnet \
+  --miden-publish-interval 3 \
   --miden-config-path /path/to/pragma_miden.json \
   --miden-storage-path /path/to/miden_storage \
   --miden-keystore-path /path/to/keystore
 ```
 
-The pusher dedupes Starknet entries by pair using the **median** of source prices before forwarding to Miden, so a tick with `BTC/USD × 5 sources` produces a single `BTC/USD` entry on Miden.
+`--miden-network` accepts `testnet`, `devnet` or `local`. `--miden-oracle-id` overrides the oracle read from `pragma_miden.json`. The three path flags are optional and default to the working directory. If Miden initialization fails at startup, Miden publishing is disabled with an error log and the Starknet pusher keeps running.
+
+The pusher dedupes entries by pair using the **median** of source prices before forwarding to Miden, so a tick with `BTC/USD × 5 sources` produces a single `BTC/USD` entry on Miden. Only pairs present in `STARKNET_PAIR_TO_MIDEN_FAUCET` are forwarded; the rest are silently skipped.
 
 ---
 

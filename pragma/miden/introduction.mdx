@@ -46,7 +46,7 @@ The Pragma-owned oracle is running on Miden testnet, fed by the same `pragma-sdk
 
 ## Asset IDs (faucet_id)
 
-Pragma Miden identifies assets with a `prefix:suffix` format, corresponding to the `[prefix, suffix, 0, 0]` word pushed onto the Miden stack:
+Pragma Miden identifies assets with a `prefix:suffix` format. On the Miden stack the pair is the word `[0, 0, suffix, prefix]` (`push.0.0.{suffix}.{prefix}` in MASM, `prefix` on top):
 
 | faucet_id | Asset      | decimals | Starknet       |
 |-----------|------------|----------|----------------|
