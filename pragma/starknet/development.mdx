@@ -179,6 +179,10 @@ let price = get_asset_conversion_rate(oracle_address, DataType::SpotEntry((KEY))
     It will only work with the `Median` aggregation mode.
 </Warning>
 
+<Warning>
+  Every read function below returns a `PragmaPricesResponse`. Validate `price != 0`, `num_sources_aggregated` and the age of `last_updated_timestamp` before using it: the oracle never rejects a stale or empty feed on your behalf. See [Validate the response before using it](./quickstart#validate-the-response-before-using-it).
+</Warning>
+
 ## Technical Specification
 
 <AccordionGroup>
@@ -194,8 +198,8 @@ The simplest function that aggregates all data into a median for a given data ty
 A `PragmaPricesResponse` struct containing:
 - `price`: aggregation result using robust median algorithm (multiplied by `10**decimals`)
 - `decimals`: number of places value has been shifted
-- `last_updated_timestamp`: timestamp of most recent entry
-- `num_sources_aggregated`: number of sources in final answer
+- `last_updated_timestamp`: timestamp of the most recent entry aggregated. The contract does not compare it to the current time: a feed with no active publisher keeps returning its last price. Reject responses older than your own tolerance.
+- `num_sources_aggregated`: number of sources in the final answer. `0` (with `price = 0`) means the pair has no usable source anymore; `1` means the median is a single value. Require the minimum your risk profile needs.
 - `expiration_timestamp`: expiration timestamp (futures only)
 </Accordion>
 

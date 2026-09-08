@@ -173,6 +173,45 @@ enum AggregationMode {
 }
 ```
 
+## Validate the response before using it
+
+The example above returns `output.price` as is. Do not do that in production: the oracle tells you how trustworthy a price is, but it never refuses to answer. Three checks belong in every consumer, and `PragmaPricesResponse` carries everything they need.
+
+```rust
+    const MIN_SOURCES: u32 = 3;      // pick the threshold for your risk profile
+    const MAX_PRICE_AGE: u64 = 3600; // seconds, pick your own tolerance
+
+    fn get_asset_price(self: @ContractState, asset_id: felt252) -> u128 {
+        let oracle_dispatcher = IPragmaABIDispatcher {
+            contract_address: self.pragma_contract.read()
+        };
+        let output: PragmaPricesResponse = oracle_dispatcher
+            .get_data_median(DataType::SpotEntry(asset_id));
+
+        // 1. A feed that has no source anymore answers with zeros, not with an error.
+        assert(output.price != 0, 'PRAGMA: no price');
+
+        // 2. Enough independent sources behind the median.
+        assert(output.num_sources_aggregated >= MIN_SOURCES, 'PRAGMA: not enough sources');
+
+        // 3. The price is recent. The oracle does not check this for you (see below).
+        assert(
+            output.last_updated_timestamp + MAX_PRICE_AGE >= get_block_timestamp(),
+            'PRAGMA: stale price'
+        );
+
+        return output.price;
+    }
+```
+
+<Warning>
+  **The oracle does not check staleness against the current time.** When aggregating, it only discards entries older than one hour *relative to the most recent entry of the pair*. A feed that nobody publishes anymore therefore keeps returning its last price, with `num_sources_aggregated` equal to 1 and an ever older `last_updated_timestamp`, for as long as the contract exists. Only your own age check (step 3) protects you from it.
+</Warning>
+
+<Info>
+  When a source is removed from a pair by the oracle admin (for example because its market died), `get_data_median` returns `price = 0`, `num_sources_aggregated = 0` and `last_updated_timestamp = 0`. Step 1 catches it. Feeds marked **D** (depreciating) on the [assets page](./assets) are in one of these two states or about to be: migrate before it happens.
+</Info>
+
 We deploying the contract, you will have to specify the oracle contract address and the summary stats contract address. The summary stats is a contract providing [computational feeds](./advanced/overview) (TWAP, Yield Curve, Realized Volatility, ...). In the provided example we will not use the summary stats contract.
 The oracle address can be found [here](./development).
 The previous contract is a simple contract, allowing a user to retrieve the price of an asset. You can play with a more complete example and deploy using Remix.

@@ -25,6 +25,10 @@ The following asset pairs are officially supported by Pragma. More are added eve
   We have a [conversion rate](https://docs.pragma.build/starknet/development#conversion-rate) feed available for most of the LSTs/LRTs. We strongly encourage you to use those, especially for xSTRK and sSTRK, given the low number of sources available on the market rate. You shouldn't go in prod with the market rate for these assets until we add more sources.
 </Warning>
 
+<Warning>
+  **SSTRK/USD (market rate) is depreciating.** Its last remaining source, an Ekubo pool with a few dollars of liquidity, no longer qualifies as a price, so the feed is not published anymore. The contract keeps returning the last value it received, so check `last_updated_timestamp` if you still read it, and migrate to `CONVERSION_SSTRK/USD`. The same applies to `UNI/USD` and `LUSD/USD`, which have had no publisher for months.
+</Warning>
+
 <Info>
   The WSTETH/USD price is not a market rate — it is computed offchain using the wstETH/stETH conversion rate. Keep this in mind when integrating.
 </Info>
@@ -40,15 +44,14 @@ The following asset pairs are officially supported by Pragma. More are added eve
     | BTC/EUR    | 18669995995518290        | 8        | ✅      | L    |
     | WSTETH/USD | 412383036120118613857092 | 8        | ✅      | M    |
     | LORDS/USD  | 1407668255603079598916   | 8        | ✅      | H    |
-    | UNI/USD    | 24011449254105924        | 8        | ✅      | M    |
+    | UNI/USD    | 24011449254105924        | 8        | ✅      | D    |
     | STRK/USD   | 6004514686061859652      | 8        | ✅      | L    |
     | NSTR/USD   | 5643947469983535940      | 8        | ✅      | H    |
     | EKUBO/USD  | 1278253658919688033092   | 8        | ✅      | H    |
     | DOG/USD    | 19227465571717956        | 5        | ✅      | H    |
     | XSTRK/USD  | 1629317993172502401860   | 8        | ✅      | H    |
     | KSTRK/USD  | 1389510320214278230852   | 8        | ✅      | H    |
-    | SSTRK/USD  | 1537084272803954643780   | 8        | ✅      | H    |
-    | BROTHER/USDPLUS  | 344361035359747530676741291142567251   | 18        | ✅      | H    |
+    | SSTRK/USD  | 1537084272803954643780   | 8        | ✅      | D    |
     | BROTHER/USDPLUS  | 344361035359747530676741291142567251   | 18        | ✅      | H    |
   </Tab>
   <Tab title="Future">
