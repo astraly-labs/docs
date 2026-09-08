@@ -48,15 +48,26 @@ The Pragma-owned oracle is running on Miden testnet, fed by the same `pragma-sdk
 
 Pragma Miden identifies assets with a `prefix:suffix` format, corresponding to the `[prefix, suffix, 0, 0]` word pushed onto the Miden stack:
 
-| faucet_id | Asset     |
-|-----------|-----------|
-| `1:0`     | BTC/USD   |
-| `2:0`     | ETH/USD   |
-| `3:0`     | WBTC/USD  |
-| `4:0`     | USDT/USD  |
-| `5:0`     | DAI/USD   |
+| faucet_id | Asset      | decimals | Starknet       |
+|-----------|------------|----------|----------------|
+| `1:0`     | BTC/USD    | 8        | also published |
+| `2:0`     | ETH/USD    | 8        | also published |
+| `3:0`     | WBTC/USD   | 8        | also published |
+| `4:0`     | USDT/USD   | 6        | also published |
+| `5:0`     | DAI/USD    | 8        | also published |
+| `6:0`     | ZEC/USD    | 8        | Miden only     |
+| `7:0`     | XMR/USD    | 8        | Miden only     |
+| `8:0`     | DASH/USD   | 8        | Miden only     |
+| `9:0`     | XAUT/USD   | 6        | Miden only     |
+| `10:0`    | PAXG/USD   | 8        | Miden only     |
+| `11:0`    | LINK/USD   | 8        | Miden only     |
+| `12:0`    | UNI/USD    | 8        | Miden only     |
+| `13:0`    | AAVE/USD   | 8        | Miden only     |
+| `14:0`    | MORPHO/USD | 8        | Miden only     |
 
-More pairs will be added as `pragma-sdk`'s `STARKNET_PAIR_TO_MIDEN_FAUCET` mapping grows.
+`6:0` to `14:0` are **Miden-only** feeds: Pragma publishes them on Miden but not on Starknet. Decimals follow `pragma-sdk`'s `min(base.decimals, quote.decimals)`, so most pairs use 8 and `USDT/USD` / `XAUT/USD` use 6 — always read the `decimals` of the pair you consume rather than hardcoding it.
+
+The list is driven by `pragma-sdk`'s `STARKNET_PAIR_TO_MIDEN_FAUCET` mapping; new pairs land there first.
 
 ## Deployments
 

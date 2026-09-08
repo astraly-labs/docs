@@ -227,8 +227,8 @@ async fn main() -> anyhow::Result<()> {
     if is_tracked == 0 {
         println!("Asset is not tracked by the oracle.");
     } else {
-        // Prices use 6 decimal places
-        println!("BTC/USD median: {} (raw: {})", median as f64 / 1_000_000.0, median);
+        // BTC/USD is an 8-decimal pair (see "Available assets" below)
+        println!("BTC/USD median: {} (raw: {})", median as f64 / 100_000_000.0, median);
     }
 
     Ok(())
@@ -242,7 +242,7 @@ async fn main() -> anyhow::Result<()> {
 ```bash
 cargo run --release
 # Latest block: 631042
-# BTC/USD median: 84500.0 (raw: 84500000000)
+# BTC/USD median: 84500.0 (raw: 8450000000000)
 ```
 
 ---
@@ -252,24 +252,33 @@ cargo run --release
 | Stack position | Field        | Description                                       |
 |----------------|--------------|---------------------------------------------------|
 | `[0]`          | `is_tracked` | `1` if the asset has data, `0` if not registered |
-| `[1]`          | `median`     | Median price scaled by `10^6`                    |
+| `[1]`          | `median`     | Median price scaled by `10^decimals` of the pair |
 | `[2]`          | `amount`     | Echo of the input `amount` parameter             |
 
-Prices use **6 decimal places** — divide by `1_000_000` to get the USD value.
+Divide by `10^decimals` of the pair to get the USD value: **8 decimals** for most pairs (`100_000_000`), **6** for `USDT/USD` and `XAUT/USD`. The per-pair decimals are listed below.
 
 ---
 
 ## Available assets
 
-| faucet_id | `prefix` | Asset    |
-|-----------|----------|----------|
-| `1:0`     | `1`      | BTC/USD  |
-| `2:0`     | `2`      | ETH/USD  |
-| `3:0`     | `3`      | SOL/USD  |
-| `4:0`     | `4`      | BNB/USD  |
-| `5:0`     | `5`      | XRP/USD  |
-| `6:0`     | `6`      | HYPE/USD |
-| `7:0`     | `7`      | POL/USD  |
+| faucet_id | `prefix` | Asset      | decimals | Starknet       |
+|-----------|----------|------------|----------|----------------|
+| `1:0`     | `1`      | BTC/USD    | 8        | also published |
+| `2:0`     | `2`      | ETH/USD    | 8        | also published |
+| `3:0`     | `3`      | WBTC/USD   | 8        | also published |
+| `4:0`     | `4`      | USDT/USD   | 6        | also published |
+| `5:0`     | `5`      | DAI/USD    | 8        | also published |
+| `6:0`     | `6`      | ZEC/USD    | 8        | Miden only     |
+| `7:0`     | `7`      | XMR/USD    | 8        | Miden only     |
+| `8:0`     | `8`      | DASH/USD   | 8        | Miden only     |
+| `9:0`     | `9`      | XAUT/USD   | 6        | Miden only     |
+| `10:0`    | `10`     | PAXG/USD   | 8        | Miden only     |
+| `11:0`    | `11`     | LINK/USD   | 8        | Miden only     |
+| `12:0`    | `12`     | UNI/USD    | 8        | Miden only     |
+| `13:0`    | `13`     | AAVE/USD   | 8        | Miden only     |
+| `14:0`    | `14`     | MORPHO/USD | 8        | Miden only     |
+
+`suffix` is always `0` today. `6:0` to `14:0` are Miden-only feeds (not published on Starknet).
 
 ---
 
@@ -292,8 +301,8 @@ For quick spot-checks without writing Rust, the `pm-oracle-cli` wraps the same l
 ```bash
 # Single asset
 pm-oracle-cli median 1:0 --network testnet
-# Median value: 84500000000 (amount: 0)
+# Median value: 8450000000000 (amount: 0)
 
 # Multiple assets — 47% faster (single sync)
-pm-oracle-cli median-batch 1:0 2:0 3:0 --network testnet --json
+pm-oracle-cli median-batch 1:0 2:0 6:0 7:0 --network testnet --json
 ```

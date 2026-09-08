@@ -125,15 +125,36 @@ The pusher dedupes Starknet entries by pair using the **median** of source price
 
 ## Available pairs
 
-| faucet_id | Asset     | decimals |
-|-----------|-----------|----------|
-| `1:0`     | BTC/USD   | 8        |
-| `2:0`     | ETH/USD   | 8        |
-| `3:0`     | WBTC/USD  | 8        |
-| `4:0`     | USDT/USD  | 6        |
-| `5:0`     | DAI/USD   | 8        |
+| faucet_id | Asset      | decimals | Starknet       |
+|-----------|------------|----------|----------------|
+| `1:0`     | BTC/USD    | 8        | also published |
+| `2:0`     | ETH/USD    | 8        | also published |
+| `3:0`     | WBTC/USD   | 8        | also published |
+| `4:0`     | USDT/USD   | 6        | also published |
+| `5:0`     | DAI/USD    | 8        | also published |
+| `6:0`     | ZEC/USD    | 8        | Miden only     |
+| `7:0`     | XMR/USD    | 8        | Miden only     |
+| `8:0`     | DASH/USD   | 8        | Miden only     |
+| `9:0`     | XAUT/USD   | 6        | Miden only     |
+| `10:0`    | PAXG/USD   | 8        | Miden only     |
+| `11:0`    | LINK/USD   | 8        | Miden only     |
+| `12:0`    | UNI/USD    | 8        | Miden only     |
+| `13:0`    | AAVE/USD   | 8        | Miden only     |
+| `14:0`    | MORPHO/USD | 8        | Miden only     |
 
 The pusher resolves decimals dynamically from each pair's currencies (`min(base.decimals, quote.decimals)`); you don't have to hardcode them. To add a pair, extend `STARKNET_PAIR_TO_MIDEN_FAUCET` in `pragma_sdk/miden/client.py` and make sure both currencies are in `supported_assets.yaml`.
+
+To publish a pair on Miden **without** pushing it to Starknet, put it in a price-pusher config group flagged `miden_only: true`: the group is polled by the fetchers and forwarded to Miden, but no Starknet listener is created for it. This is how `6:0` to `14:0` are published:
+
+```yaml
+- pairs:
+    spot:
+      - ZEC/USD
+      - XAUT/USD
+  time_difference: 1800
+  price_deviation: 0.01
+  miden_only: true
+```
 
 ---
 
