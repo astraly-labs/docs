@@ -89,6 +89,8 @@ To assist in evaluating risks, we've developed a comprehensive risk assessment s
     </Frame>
     
     Depreciating feeds will be discontinued in the future. We recommend migrating to alternative feeds as soon as possible.
+
+    A discontinued feed does not disappear from the contract: once its last source stops publishing, `get_data_median` keeps returning the last aggregated price with `num_sources_aggregated = 1` and an ever older `last_updated_timestamp`, and once the source is removed it returns zeros. Both cases are caught by the checks described in [Validate the response before using it](./quickstart#validate-the-response-before-using-it).
   </Accordion>
 </AccordionGroup>
 
@@ -125,6 +127,10 @@ This auditing step is essential for maintaining the integrity of your project an
 </Warning>
 
 ## Risk Mitigation Best Practices
+
+<Warning>
+  Whatever the risk level of a feed, always validate `price`, `num_sources_aggregated` and `last_updated_timestamp` before using a response. The oracle never refuses to answer, it only tells you how much to trust the answer. See [Validate the response before using it](./quickstart#validate-the-response-before-using-it).
+</Warning>
 
 <CardGroup cols={2}>
   <Card title="Back-testing" icon="chart-line">
