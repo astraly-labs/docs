@@ -44,6 +44,8 @@ Pragma Miden is built directly on top of this model: publishers write prices to 
 
 The Pragma-owned oracle is running on Miden testnet, fed by the same `pragma-sdk` price-pusher we use for Starknet. You can browse live medians at **[miden.pragma.build](https://miden.pragma.build)**.
 
+The testnet runs Miden node **0.16** (since September 2026, after a chain reset): clients must be on `miden-client 0.16` / `pragma-sdk >= 2.14.4`. Every transaction pays a small fee in the chain's native asset (a 14-entry publish costs ~112 base units); reads through `get_median` are free. Publishers fund their account from the public faucet, the price-pusher does it automatically.
+
 ## Asset IDs (faucet_id)
 
 Pragma Miden identifies assets with a `prefix:suffix` format. On the Miden stack the pair is the word `[0, 0, suffix, prefix]` (`push.0.0.{suffix}.{prefix}` in MASM, `prefix` on top):
