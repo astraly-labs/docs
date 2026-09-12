@@ -28,15 +28,15 @@ cargo new miden-price-reader
 cd miden-price-reader
 ```
 
-`Cargo.toml` — the oracle runs on Miden **0.15**; `pm-accounts` provides the compiled oracle library and `pm-utils-cli` a ready-made testnet client:
+`Cargo.toml` — the oracle runs on Miden **0.16** (node 0.16 rejects 0.15 clients; MSRV is Rust 1.98); `pm-accounts` provides the compiled oracle package and `pm-utils-cli` a ready-made testnet client:
 
 ```toml
 [dependencies]
 pm-accounts     = { git = "https://github.com/astraly-labs/pragma-miden" }
 pm-utils-cli    = { git = "https://github.com/astraly-labs/pragma-miden" }
-miden-client    = { version = "0.15", features = ["tonic", "testing"] }
-miden-protocol  = "0.15"
-miden-standards = "0.15"
+miden-client    = { version = "0.16", features = ["tonic", "testing"] }
+miden-protocol  = "0.16"
+miden-standards = "0.16"
 tokio           = { version = "1", features = ["rt-multi-thread", "macros"] }
 anyhow          = "1"
 ```
@@ -63,8 +63,8 @@ use pm_accounts::oracle::get_oracle_component_library;
 use pm_utils_cli::setup_testnet_client;
 use std::collections::BTreeMap;
 
-// Pragma oracle on Miden testnet — check github.com/astraly-labs/pragma-miden#deployments
-const ORACLE_ID: &str = "0x7ad4aa02b1816c117e32853e210c28";
+// Pragma oracle on the Miden 0.16 testnet — check github.com/astraly-labs/pragma-miden#deployments
+const ORACLE_ID: &str = "0x3b306d819a19b691205480e1619b5c";
 
 // Storage slot names (defined in oracle.masm / publisher.masm)
 const SLOT_NEXT_INDEX: &str = "pragma::oracle::next_publisher_index";
@@ -101,7 +101,7 @@ async fn get_oracle_foreign_accounts(
         .map(|i| -> Result<AccountId> {
             let key: Word = [Felt::new(i)?, ZERO, ZERO, ZERO].into();
             let w = storage
-                .get_map_item(&publishers_slot, key)
+                .get_map_item(&publishers_slot, StorageMapKey::new(key))
                 .with_context(|| format!("publisher at index {i} not found"))?;
             // Same layout as pm-oracle-cli: [prefix, suffix, 0, 0]
             Ok(AccountId::new_unchecked([w[0], w[1]]))
@@ -133,7 +133,7 @@ async fn get_oracle_foreign_accounts(
 
 ## Step 3: Call `get_median` via FPI
 
-The oracle's `get_median` procedure is called from a transaction script executed read-only against the oracle account (`execute_program`, nothing is submitted). The script pushes the pair word and calls the oracle via FPI.
+The oracle's `get_median` procedure is called from a transaction script executed read-only against the oracle account (`execute_program`, nothing is submitted, so **no fee is paid**). The script pushes the pair word and calls the oracle via FPI. Since Miden 0.16 a transaction script is a `@transaction_script pub proc main … end` block.
 
 ```rust
 #[tokio::main]
@@ -160,7 +160,8 @@ async fn main() -> Result<()> {
         use oracle_component::oracle_module
         use miden::core::sys
 
-        begin
+        @transaction_script
+        pub proc main
             push.0.0.{suffix}.{prefix}
             call.oracle_module::get_median
             exec.sys::truncate_stack
@@ -169,8 +170,9 @@ async fn main() -> Result<()> {
         prefix = prefix,
         suffix = suffix,
     );
+    let oracle_lib = get_oracle_component_library();
     let script = CodeBuilder::default()
-        .with_dynamically_linked_library(&get_oracle_component_library())
+        .with_dynamically_linked_package(&*oracle_lib)
         .map_err(|e| anyhow::anyhow!("library error: {e:?}"))?
         .compile_tx_script(script_code)
         .map_err(|e| anyhow::anyhow!("compile error: {e:?}"))?;
@@ -208,8 +210,8 @@ async fn main() -> Result<()> {
 
 ```bash
 cargo run --release
-# Latest block: 651945
-# BTC/USD median: 78457.2 (raw: 7845720000000)
+# Latest block: 92610
+# BTC/USD median: 77365.11 (raw: 7736511888374)
 ```
 
 ---
@@ -252,7 +254,7 @@ Divide by `10^decimals` of the pair to get the USD value: **8 decimals** for mos
 ## Oracle reference
 
 <Note>
-  Contract addresses change between testnet iterations. Always refer to the [pragma-miden README](https://github.com/astraly-labs/pragma-miden#deployments) for the latest oracle ID.
+  Contract addresses change between testnet iterations: the testnet was reset with node 0.16 in September 2026 and the 0.15 accounts no longer exist. Always refer to the [pragma-miden README](https://github.com/astraly-labs/pragma-miden#deployments) for the latest oracle ID.
 </Note>
 
 <Tip>

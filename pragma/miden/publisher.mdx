@@ -4,7 +4,7 @@ description: "Become a Pragma Miden publisher and push price data on-chain"
 ---
 
 <Note>
-  Miden publishing is part of the stable `pragma-sdk` release (`2.14.2` or later) behind the `[miden]` extra.
+  Miden publishing is part of the stable `pragma-sdk` release behind the `[miden]` extra. The Miden testnet runs node **0.16** since September 2026: use `pragma-sdk >= 2.14.4` (`pm-publisher >= 0.1.0a12`), older releases are rejected by the node.
 </Note>
 
 Publishers submit price data directly to their own Miden account. The Oracle reads from all registered publishers when computing the median.
@@ -25,14 +25,17 @@ The `[miden]` extra pulls in `pm-publisher`, the Rust-backed Python wheel that d
 
 ## Step 2 — Initialize your publisher account
 
-Run this once. It creates your publisher account on Miden and writes your credentials locally.
+Run this once. It creates your publisher account on Miden and writes your credentials locally. Pass the Pragma oracle id (see the [pragma-miden README](https://github.com/astraly-labs/pragma-miden#deployments)): it is stored next to your publisher id.
 
 ```python
 import asyncio
 from pragma_sdk.miden.client import PragmaMidenClient
 
 async def main():
-    client = PragmaMidenClient(network="testnet")
+    client = PragmaMidenClient(
+        network="testnet",
+        oracle_id="0x3b306d819a19b691205480e1619b5c",  # Pragma oracle on the 0.16 testnet
+    )
     await client.initialize()
     print(f"Your publisher ID: {client.publisher_id}")
 
@@ -53,7 +56,20 @@ This creates three files in your working directory:
 
 ---
 
-## Step 3 — Get registered
+## Step 3 — Fund your account
+
+Miden 0.16 charges every transaction a fee in the chain's native asset, paid from your account's vault: about **112 base units per 14-entry batch**, 119 for the registration, nothing for reads. On testnet the only source is the public faucet. Your account is created with `BasicWallet`, so it can receive the faucet's note:
+
+```python
+balance = await client.maintain_fee_balance()   # 0 → asks the faucet for 100 tokens (100_000_000 base units)
+print(balance)                                  # ≈ 99_999_881 after the note is consumed
+```
+
+`maintain_fee_balance()` reads the balance (`fee_balance()`) at most every 10 minutes and, below `FEE_REFILL_THRESHOLD` (2 000 000 base units, ~15 h of publishing at one batch every 3 s), solves the faucet's proof-of-work, mints a note and consumes it. It never raises: failures are logged and counted. 100 tokens cover roughly 10 months of continuous publishing, so refills are rare. The same is available from the CLI: `pm-publisher-cli -n testnet fund` / `balance`.
+
+---
+
+## Step 4 — Get registered
 
 Share your publisher ID (from `pragma_miden.json`) with the Pragma team. We will register it on the oracle so your prices are included in the median computation.
 
@@ -73,7 +89,7 @@ Share your publisher ID (from `pragma_miden.json`) with the Pragma team. We will
 
 ---
 
-## Step 4 — Publish prices
+## Step 5 — Publish prices
 
 Once registered, publish entries as part of your existing data pipeline:
 
@@ -82,7 +98,7 @@ import asyncio
 from pragma_sdk.miden.client import PragmaMidenClient, MidenEntry
 
 async def main():
-    client = PragmaMidenClient(network="testnet")
+    client = PragmaMidenClient(network="testnet")   # oracle_id read from pragma_miden.json
     await client.initialize()
 
     entries = [
@@ -123,6 +139,8 @@ price-pusher \
 `--miden-network` accepts `testnet`, `devnet` or `local`. `--miden-oracle-id` overrides the oracle read from `pragma_miden.json`. The three path flags are optional and default to the working directory. If Miden initialization fails at startup, Miden publishing is disabled with an error log and the Starknet pusher keeps running.
 
 The pusher dedupes entries by pair using the **median** of source prices before forwarding to Miden, so a tick with `BTC/USD × 5 sources` produces a single `BTC/USD` entry on Miden. Only pairs present in `STARKNET_PAIR_TO_MIDEN_FAUCET` are forwarded; the rest are silently skipped.
+
+The pusher also keeps the account funded: after each Miden tick it calls `maintain_fee_balance()` and exposes `pragma_miden_fee_balance{account}` and `pragma_miden_refills_total{account,result}` on `/metrics`, so you can alert on a low balance or a failed refill.
 
 ---
 
@@ -178,6 +196,8 @@ class PragmaMidenClient:
     async def publish_entries(self, entries: list[MidenEntry]) -> list[bool]: ...
     async def get_entry(self, pair: str) -> MidenEntry | None: ...           # None on failure
     async def sync(self) -> None: ...
+    async def fee_balance(self) -> int: ...                                  # base units of the fee asset
+    async def maintain_fee_balance(self, threshold: int = FEE_REFILL_THRESHOLD) -> int | None: ...  # faucet refill below threshold
 
 class MidenEntry:
     pair: str       # faucet_id, e.g. "1:0"
