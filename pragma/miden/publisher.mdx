@@ -4,7 +4,7 @@ description: "Become a Pragma Miden publisher and push price data on-chain"
 ---
 
 <Note>
-  Miden publishing is part of the stable `pragma-sdk` release behind the `[miden]` extra. The Miden testnet runs node **0.16** since September 2026: use `pragma-sdk >= 2.14.4` (`pm-publisher >= 0.1.0a12`), older releases are rejected by the node.
+  Miden publishing is part of the stable `pragma-sdk` release behind the `[miden]` extra. The Miden testnet runs node **0.17** since October 2026: use `pragma-sdk >= 2.16.3` (`pm-publisher >= 0.1.0a13`), older releases are rejected by the node.
 </Note>
 
 Publishers submit price data directly to their own Miden account. The Oracle reads from all registered publishers when computing the median.
@@ -34,7 +34,7 @@ from pragma_sdk.miden.client import PragmaMidenClient
 async def main():
     client = PragmaMidenClient(
         network="testnet",
-        oracle_id="0x3b306d819a19b691205480e1619b5c",  # Pragma oracle on the 0.16 testnet
+        oracle_id="0x0d39e78df12351510ec5047670b40e",  # Pragma oracle on the 0.17 testnet
     )
     await client.initialize()
     print(f"Your publisher ID: {client.publisher_id}")
@@ -58,7 +58,7 @@ This creates three files in your working directory:
 
 ## Step 3 — Fund your account
 
-Miden 0.16 charges every transaction a fee in the chain's native asset, paid from your account's vault: about **112 base units per 14-entry batch**, 119 for the registration, nothing for reads. On testnet the only source is the public faucet. Your account is created with `BasicWallet`, so it can receive the faucet's note:
+Miden 0.17 charges every transaction a fee in the chain's native asset, paid from your account's vault: about **112 base units per 14-entry batch**, 119 for the registration, nothing for reads. On testnet the only source is the public faucet. Your account is created with `BasicWallet`, so it can receive the faucet's note:
 
 ```python
 balance = await client.maintain_fee_balance()   # 0 → asks the faucet for 100 tokens (100_000_000 base units)
