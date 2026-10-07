@@ -66,8 +66,9 @@ Pragma Miden identifies assets with a `prefix:suffix` format. On the Miden stack
 | `12:0`    | UNI/USD    | 8        | Miden only     |
 | `13:0`    | AAVE/USD   | 8        | Miden only     |
 | `14:0`    | MORPHO/USD | 8        | Miden only     |
+| `15:0`    | USDC/USD   | 6        | also published |
 
-`6:0` to `14:0` are **Miden-only** feeds: Pragma publishes them on Miden but not on Starknet. Decimals follow `pragma-sdk`'s `min(base.decimals, quote.decimals)`, so most pairs use 8 and `USDT/USD` / `XAUT/USD` use 6 — always read the `decimals` of the pair you consume rather than hardcoding it.
+`6:0` to `14:0` are **Miden-only** feeds: Pragma publishes them on Miden but not on Starknet. Decimals follow `pragma-sdk`'s `min(base.decimals, quote.decimals)`, so most pairs use 8 and `USDT/USD` / `USDC/USD` / `XAUT/USD` use 6 — always read the `decimals` of the pair you consume rather than hardcoding it.
 
 The list is driven by `pragma-sdk`'s `STARKNET_PAIR_TO_MIDEN_FAUCET` mapping; new pairs land there first.
 

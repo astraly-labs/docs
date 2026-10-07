@@ -224,7 +224,7 @@ cargo run --release
 | `[1]`          | `median`     | Median price scaled by `10^decimals` of the pair |
 | `[2]`          | `amount`     | Echo of the input `amount` parameter             |
 
-Divide by `10^decimals` of the pair to get the USD value: **8 decimals** for most pairs (`100_000_000`), **6** for `USDT/USD` and `XAUT/USD`. The per-pair decimals are listed below.
+Divide by `10^decimals` of the pair to get the USD value: **8 decimals** for most pairs (`100_000_000`), **6** for `USDT/USD`, `USDC/USD` and `XAUT/USD`. The per-pair decimals are listed below.
 
 ---
 
@@ -246,6 +246,7 @@ Divide by `10^decimals` of the pair to get the USD value: **8 decimals** for mos
 | `12:0`    | `12`     | UNI/USD    | 8        | Miden only     |
 | `13:0`    | `13`     | AAVE/USD   | 8        | Miden only     |
 | `14:0`    | `14`     | MORPHO/USD | 8        | Miden only     |
+| `15:0`    | `15`     | USDC/USD   | 6        | also published |
 
 `suffix` is always `0` today. `6:0` to `14:0` are Miden-only feeds (not published on Starknet).
 
