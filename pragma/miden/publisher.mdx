@@ -162,6 +162,7 @@ The pusher also keeps the account funded: after each Miden tick it calls `mainta
 | `12:0`    | UNI/USD    | 8        | Miden only     |
 | `13:0`    | AAVE/USD   | 8        | Miden only     |
 | `14:0`    | MORPHO/USD | 8        | Miden only     |
+| `15:0`    | USDC/USD   | 6        | also published |
 
 The pusher resolves decimals dynamically from each pair's currencies (`min(base.decimals, quote.decimals)`); you don't have to hardcode them. To add a pair, extend `STARKNET_PAIR_TO_MIDEN_FAUCET` in `pragma_sdk/miden/client.py` and make sure both currencies are in `supported_assets.yaml`.
 
