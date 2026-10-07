@@ -28,15 +28,15 @@ cargo new miden-price-reader
 cd miden-price-reader
 ```
 
-`Cargo.toml` — the oracle runs on Miden **0.16** (node 0.16 rejects 0.15 clients; MSRV is Rust 1.98); `pm-accounts` provides the compiled oracle package and `pm-utils-cli` a ready-made testnet client:
+`Cargo.toml` — the oracle runs on Miden **0.17** (node 0.17 rejects 0.16 clients; MSRV is Rust 1.98.1); `pm-accounts` provides the compiled oracle package and `pm-utils-cli` a ready-made testnet client:
 
 ```toml
 [dependencies]
 pm-accounts     = { git = "https://github.com/astraly-labs/pragma-miden" }
 pm-utils-cli    = { git = "https://github.com/astraly-labs/pragma-miden" }
-miden-client    = { version = "0.16", features = ["tonic", "testing"] }
-miden-protocol  = "0.16"
-miden-standards = "0.16"
+miden-client    = { version = "0.17", features = ["tonic", "testing"] }
+miden-protocol  = "0.17"
+miden-standards = "0.17"
 tokio           = { version = "1", features = ["rt-multi-thread", "macros"] }
 anyhow          = "1"
 ```
@@ -63,8 +63,8 @@ use pm_accounts::oracle::get_oracle_component_library;
 use pm_utils_cli::setup_testnet_client;
 use std::collections::BTreeMap;
 
-// Pragma oracle on the Miden 0.16 testnet — check github.com/astraly-labs/pragma-miden#deployments
-const ORACLE_ID: &str = "0x3b306d819a19b691205480e1619b5c";
+// Pragma oracle on the Miden 0.17 testnet — check github.com/astraly-labs/pragma-miden#deployments
+const ORACLE_ID: &str = "0x0d39e78df12351510ec5047670b40e";
 
 // Storage slot names (defined in oracle.masm / publisher.masm)
 const SLOT_NEXT_INDEX: &str = "pragma::oracle::next_publisher_index";
@@ -254,7 +254,7 @@ Divide by `10^decimals` of the pair to get the USD value: **8 decimals** for mos
 ## Oracle reference
 
 <Note>
-  Contract addresses change between testnet iterations: the testnet was reset with node 0.16 in September 2026 and the 0.15 accounts no longer exist. Always refer to the [pragma-miden README](https://github.com/astraly-labs/pragma-miden#deployments) for the latest oracle ID.
+  Contract addresses change between testnet iterations: the testnet was reset with node 0.17 in October 2026 and the 0.16 accounts no longer exist. Always refer to the [pragma-miden README](https://github.com/astraly-labs/pragma-miden#deployments) for the latest oracle ID.
 </Note>
 
 <Tip>
