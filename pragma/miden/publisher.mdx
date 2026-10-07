@@ -61,11 +61,13 @@ This creates three files in your working directory:
 Miden 0.17 charges every transaction a fee in the chain's native asset, paid from your account's vault: about **112 base units per 14-entry batch**, 119 for the registration, nothing for reads. On testnet the only source is the public faucet. Your account is created with `BasicWallet`, so it can receive the faucet's note:
 
 ```python
-balance = await client.maintain_fee_balance()   # 0 → asks the faucet for 100 tokens (100_000_000 base units)
-print(balance)                                  # ≈ 99_999_881 after the note is consumed
+balance = await client.maintain_fee_balance()   # below the threshold -> asks the faucet for one note
+print(balance)                                  # e.g. 9_881 after consuming a 10_000 note (119 fee)
 ```
 
-`maintain_fee_balance()` reads the balance (`fee_balance()`) at most every 10 minutes and, below `FEE_REFILL_THRESHOLD` (2 000 000 base units, ~15 h of publishing at one batch every 3 s), solves the faucet's proof-of-work, mints a note and consumes it. It never raises: failures are logged and counted. 100 tokens cover roughly 10 months of continuous publishing, so refills are rare. The same is available from the CLI: `pm-publisher-cli -n testnet fund` / `balance`.
+`maintain_fee_balance()` reads the balance (`fee_balance()`) at most every 2 minutes and, below `FEE_REFILL_THRESHOLD` (40 000 base units, ~350 batches), solves the faucet's proof-of-work, mints a note and consumes it. It never raises: failures are logged and counted.
+
+The 0.17 faucet gives at most **10 000 base units (0.01 token) per request**, one request per account every 30 seconds, and is sometimes unavailable. One refill therefore covers only ~90 batches (about 9 minutes at one batch every 6 s): refills are frequent, and a faucet outage eventually starves the account, so monitor `fee_balance()`. After a failed refill the publisher retries 10 minutes later if the account can still pay for batches, and at the next 2-minute check if it is nearly empty. The same is available from the CLI: `pm-publisher-cli -n testnet fund` / `balance`.
 
 ---
 
