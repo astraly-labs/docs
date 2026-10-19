@@ -3,6 +3,10 @@ title: Consume Data
 description: "Query price feeds from the Pragma Miden oracle via the Rust client"
 ---
 
+<Note>
+  A new oracle (v1) is about to replace this one, with new price keys. Everything below describes the current oracle. See [Pairs and keys](./v1-pairs) and [Consume Data (v1)](./v1-consumer) to prepare your migration; we will announce the retirement of the current oracle in advance.
+</Note>
+
 This guide shows how to build a Rust application that reads on-chain price data from the Pragma oracle using [Foreign Procedure Invocation (FPI)](https://docs.miden.xyz/builder/develop/tutorials/rust-client/foreign_procedure_invocation_tutorial).
 
 <Card title="Ready-to-run example" icon="github" href="https://github.com/astraly-labs/pragma-miden/tree/main/examples/consume-price">

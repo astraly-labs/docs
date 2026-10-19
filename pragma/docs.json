@@ -71,6 +71,14 @@
               "miden/publisher",
               "miden/consumer"
             ]
+          },
+          {
+            "group": "Oracle v1",
+            "pages": [
+              "miden/v1-pairs",
+              "miden/v1-consumer",
+              "miden/v1-publisher"
+            ]
           }
         ]
       },
