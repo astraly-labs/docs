@@ -4,7 +4,12 @@ description: "Run a publisher account for the Pragma oracle v1 on Miden"
 ---
 
 <Note>
-  **Oracle v1.** This is the new Pragma oracle on Miden, which replaces the current one. Its address is published here when it is deployed; the current oracle stays live during a migration window. The price keys change: see [Pairs and keys](./v1-pairs).
+  **Oracle v1**, live on Miden testnet and mainnet. The 15 pairs are listed in [Pairs and keys](./v1-pairs); entries are published every 3 seconds on mainnet and every 30 seconds on testnet.
+
+  - Mainnet oracle: `0x8f8d747477ca171144feadc60a1137` (multisig, 2 of 3 signers)
+  - Testnet oracle: `0xf86fe46c20e578513374651ecd6d0f`
+
+  The former oracle is retired.
 </Note>
 
 A publisher runs its own Miden account and writes price entries into it. The oracle reads every
@@ -30,14 +35,22 @@ code cannot change, that check holds for as long as the account is registered.
 
 ## 2. Fund it
 
-Every transaction pays its fee, in the chain's native fee asset, from your account's vault. There is no
-faucet on mainnet: send the fee asset to your publisher account from a wallet you control, then have the
-account consume the note; `pm-publisher-cli balance` shows what it holds.
+Every transaction pays its fee, in the chain's native fee asset, from your account's vault. On mainnet the
+fee asset is USDCx (6 decimals) and there is no faucet: send it to your publisher account from a wallet you
+control (a public or private note), then have the account consume the note. `pm-publisher-cli -n mainnet
+consume` opens the notes waiting for the account, including the private ones a wallet such as Bread sends
+through the note transport, and `pm-publisher-cli -n mainnet balance` shows what it holds. On testnet, `fund`
+asks the public faucet, which is sometimes down: a transfer from another account works too.
 
-Measured on the testnet, a batch of 15 entries costs about 110 to 130 base units of the fee asset (6
-decimals). One batch per minute is about 170,000 base units a day; one batch every 3 seconds is about 3.2
-million. Mainnet fees may differ: check `balance` after your first batches and size your top-ups from
-the real spend. Keep several days of runway; an empty account stops publishing and its entries age out.
+On mainnet the account must also be on Miden's **network allowlist** before its first transaction. An
+invitation code from Miden registers it, once: put the code in a file and run
+`pm-publisher-cli -n mainnet register-account --code-file code.txt`; `allowed` tells whether an account is
+registered. Do this before funding it.
+
+Measured on mainnet, a batch of 15 entries costs about 113 base units of the fee asset (0.000113 USDCx).
+One batch per minute is about 163,000 base units a day; one batch every 3 seconds is about 3.25 USDCx a day.
+Check `balance` after your first batches and size your top-ups from the real spend. Keep several days of
+runway; an empty account stops publishing and its entries age out.
 
 ## 3. Get registered
 
