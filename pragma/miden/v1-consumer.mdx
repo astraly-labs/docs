@@ -4,7 +4,12 @@ description: "Read the Pragma oracle v1 on Miden and check the price before usin
 ---
 
 <Note>
-  **Oracle v1.** The Pragma oracle on Miden. Testnet oracle: `0xf86fe46c20e578513374651ecd6d0f`, published every 30 seconds for the 15 pairs listed in [Pairs and keys](./v1-pairs). The mainnet address is published here at the launch. It replaces the former oracle, which is retired.
+  **Oracle v1**, live on Miden testnet and mainnet. The 15 pairs are listed in [Pairs and keys](./v1-pairs); entries are published every 3 seconds on mainnet and every 30 seconds on testnet.
+
+  - Mainnet oracle: `0x8f8d747477ca171144feadc60a1137` (multisig, 2 of 3 signers)
+  - Testnet oracle: `0xf86fe46c20e578513374651ecd6d0f`
+
+  The former oracle is retired.
 </Note>
 
 <Card title="Ready-to-run example" icon="github" href="https://github.com/astraly-labs/pragma-miden/tree/main/examples/consume-price">
@@ -34,6 +39,16 @@ get_median_with_max_age(KEY, max_age) -> same, with your own freshness window
   nobody ever published it.
 
 Pairs, decimals and keys: see [Pairs and keys](./v1-pairs).
+
+## Networks
+
+| | Mainnet | Testnet |
+|---|---|---|
+| Oracle | `0x8f8d747477ca171144feadc60a1137` | `0xf86fe46c20e578513374651ecd6d0f` |
+| Node | `https://rpc.cedar.miden.io` | `https://rpc.testnet.miden.io` |
+| Explorer | `https://explorer.cedar.miden.io` | `https://testnet.midenscan.com` |
+
+The example reads either one: `cargo run --release -p consume-price -- --network mainnet --oracle 0x8f8d747477ca171144feadc60a1137 --pair BTC/USD`. On mainnet, an account that sends transactions must be registered on Miden's network allowlist before its first one (an invitation code from Miden); a read through a foreign procedure call run locally does not send a transaction.
 
 ## What to check before using a price
 
