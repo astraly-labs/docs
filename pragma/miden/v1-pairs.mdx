@@ -3,7 +3,7 @@ title: Pairs and keys
 description: "The pairs published by the Pragma oracle v1 on Miden and their on-chain keys"
 ---
 
-The key of a pair is derived from its name, so there is nothing to look up or register: it is the Poseidon2 hash (Miden `Hasher::hash`) of the pair name in upper case, `BASE/QUOTE`, as UTF-8 bytes. These are the pairs published at launch. The keys are fixed and never change; a new pair gets its key the same way.
+The oracle v1 is live on the Miden testnet at `0xf86fe46c20e578513374651ecd6d0f`. The key of a pair is derived from its name, so there is nothing to look up or register: it is the Poseidon2 hash (Miden `Hasher::hash`) of the pair name in upper case, `BASE/QUOTE`, as UTF-8 bytes. These are the pairs published at launch. The keys are fixed and never change; a new pair gets its key the same way.
 
 `decimals` is what the publishers use for the pair (`min(base decimals, quote decimals)`). Read it from the oracle's answer rather than hard-coding it.
 
