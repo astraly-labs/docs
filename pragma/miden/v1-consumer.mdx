@@ -4,7 +4,7 @@ description: "Read the Pragma oracle v1 on Miden and check the price before usin
 ---
 
 <Note>
-  **Oracle v1**, live on Miden testnet and mainnet. The 16 pairs are listed in [Pairs and keys](./v1-pairs); entries are published every 3 seconds on mainnet and every 30 seconds on testnet.
+  **Oracle v1**, live on Miden testnet and mainnet. The 16 pairs are listed in [Pairs and keys](./v1-pairs); on mainnet the oracle aggregates three Pragma publishers (one publishes every 3 seconds, the two others every 10 seconds); on testnet one publisher publishes every 30 seconds.
 
   - Mainnet oracle: `0x8f8d747477ca171144feadc60a1137` (multisig, 2 of 3 signers)
   - Testnet oracle: `0xf86fe46c20e578513374651ecd6d0f`
@@ -54,7 +54,8 @@ The example reads either one: `cargo run --release -p consume-price -- --network
 
 1. **`num_publishers` is at least what you need.** `0` means there is no price: `median_price` and
    `decimals` are `0` and must never be used. The call does not fail in that case. Pick a minimum
-   that matches the value at risk: with a single publisher the "median" is that publisher alone.
+   that matches the value at risk: with a single publisher the "median" is that publisher alone. Three
+   publishers are registered on mainnet today, one on testnet.
 2. **Distinguish late from unknown.** `num_publishers = 0` with `last_updated > 0` is a late pair;
    both at `0` is a key nobody ever published, which is also what a typo in the pair name produces
    and what a paused oracle answers.
@@ -62,7 +63,10 @@ The example reads either one: `cargo run --release -p consume-price -- --network
 3. **Freshness against your own tolerance.** The default 120 s is a general-purpose window,
    not a safety margin for your protocol. If you liquidate, settle or mint on this price, call `get_median_with_max_age` with
    the bound your protocol can live with, and compare `last_updated` with the reference block
-   timestamp yourself.
+   timestamp yourself. `last_updated` is the newest entry of any publisher, so it can be fresher than
+   the median. The mainnet publishers do not update at the same rate (every 3 to 10 seconds): with a
+   `max_age` of about 10 seconds or less, `num_publishers` can fall below 3 between two updates, so
+   choose your minimum accordingly.
 4. **`decimals` is what you expect.** It follows the pair (8 for most, 6 for USDT/USD, USDC/USD and
    XAUT/USD) and is read from the data, so assert it against the value your arithmetic assumes
    instead of hard-coding a scale.

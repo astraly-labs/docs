@@ -4,7 +4,7 @@ description: "Run a publisher account for the Pragma oracle v1 on Miden"
 ---
 
 <Note>
-  **Oracle v1**, live on Miden testnet and mainnet. The 16 pairs are listed in [Pairs and keys](./v1-pairs); entries are published every 3 seconds on mainnet and every 30 seconds on testnet.
+  **Oracle v1**, live on Miden testnet and mainnet. The 16 pairs are listed in [Pairs and keys](./v1-pairs); on mainnet the oracle aggregates three Pragma publishers (one publishes every 3 seconds, the two others every 10 seconds); on testnet one publisher publishes every 30 seconds.
 
   - Mainnet oracle: `0x8f8d747477ca171144feadc60a1137` (multisig, 2 of 3 signers)
   - Testnet oracle: `0xf86fe46c20e578513374651ecd6d0f`
@@ -82,7 +82,9 @@ Quality is your responsibility, because your entry goes straight into the median
 - Never publish a placeholder, a stale value with a new timestamp, or a test value.
 - Check each price against your previous one; a sudden jump deserves a second look before it is sent.
 
-Publish at least once a minute. Consumers read with a default window of 120 seconds (they may choose a
+Publish at least once a minute, and every 10 seconds or faster if you can: the oracle takes the last entry of
+each publisher, so a slow publisher makes the median lag when prices move quickly. The Pragma publishers
+run every 3 to 10 seconds. Consumers read with a default window of 120 seconds (they may choose a
 tighter one), and an entry older than their window is ignored. Send all your pairs in one batched
 transaction: it is atomic, and cheaper than one transaction per pair.
 
